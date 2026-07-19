@@ -4,6 +4,8 @@ package br.com.ufca.sixsevenpayapi.domain.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "administrators")
 public class Administrator extends Employee {
@@ -19,7 +21,7 @@ public class Administrator extends Employee {
             String password,
             String phone,
             String registration,
-            java.time.LocalDate hireDate) {
+            LocalDate hireDate) {
 
         super(fullName, cpf, email, password, phone, registration, hireDate);
     }
