@@ -1,5 +1,7 @@
 package br.com.ufca.sixsevenpayapi.application.service;
 
+import br.com.ufca.sixsevenpayapi.application.dto.LoginRequestDTO;
+import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
 import br.com.ufca.sixsevenpayapi.domain.entity.Customer;
 import br.com.ufca.sixsevenpayapi.domain.entity.User;
@@ -18,16 +20,16 @@ public class AuthenticationService {
         this.userRepository = userRepository;
     }
 
-    public User login(String cpf, String password){
-        String clearCpf = CpfValidator.validateAndSanitizeCpf(cpf);
+    public UserResponseDTO login(LoginRequestDTO dto) {
+        String clearCpf = CpfValidator.validateAndSanitizeCpf(dto.cpf());
         User user = userRepository.findByCpf(clearCpf);
         if(user == null){
             throw new RuntimeException("Usuário não existe");
         }
-        if(!password.equals(user.getPassword())){
+        if(!dto.password().equals(user.getPassword())){
             throw new RuntimeException("Senha incorreta");
         }
-        return user;
+        return UserResponseDTO.fromEntity(user);
     }
 
     @Transactional
