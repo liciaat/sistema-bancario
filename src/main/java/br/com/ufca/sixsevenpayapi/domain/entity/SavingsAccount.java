@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "tb_savings_accounts")
+@Table(name = "savings_accounts")
 public class SavingsAccount extends Account {
 
     protected SavingsAccount() {

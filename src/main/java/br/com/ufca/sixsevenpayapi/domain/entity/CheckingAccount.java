@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "tb_checking_accounts")
+@Table(name = "checking_accounts")
 public class CheckingAccount extends Account {
 
     @Column(name = "overdraft_limit", nullable = false, precision = 19, scale = 2)

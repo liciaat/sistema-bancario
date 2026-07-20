@@ -4,7 +4,7 @@ import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "tb_account_requests")
+@Table(name = "account_requests")
 public class AccountRequest extends Request {
     @Enumerated(EnumType.STRING)
     @Column(name = "requested_account_type", nullable = false)

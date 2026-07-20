@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "tb_purchases")
+@Table(name = "purchases")
 public class Purchase extends BaseEntity {
 
     @ManyToOne

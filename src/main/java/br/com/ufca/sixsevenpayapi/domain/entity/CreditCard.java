@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tb_credit_cards")
+@Table(name = "credit_cards")
 public class CreditCard extends BaseEntity {
 
     @Column(name = "card_number", nullable = false, unique = true, length = 16)

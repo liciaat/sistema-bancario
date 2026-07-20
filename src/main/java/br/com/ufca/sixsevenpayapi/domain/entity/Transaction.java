@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "tb_transactions")
+@Table(name = "transactions")
 public class Transaction extends BaseEntity {
 
     @ManyToOne

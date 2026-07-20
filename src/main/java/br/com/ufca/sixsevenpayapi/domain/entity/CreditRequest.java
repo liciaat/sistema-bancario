@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "tb_credit_requests")
+@Table(name = "credit_requests")
 public class CreditRequest extends Request {
     @Column(name = "requested_limit", nullable = false, precision = 19, scale = 2)
     private BigDecimal requestedLimit;

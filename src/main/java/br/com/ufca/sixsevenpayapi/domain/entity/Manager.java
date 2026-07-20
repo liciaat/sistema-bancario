@@ -6,7 +6,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "tb_managers")
+@Table(name = "managers")
 public class Manager extends Employee {
 
     public Manager() {

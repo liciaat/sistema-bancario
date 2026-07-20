@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tb_accounts")
+@Table(name = "accounts")
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Account extends BaseEntity {
 

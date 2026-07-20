@@ -4,7 +4,7 @@ import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "tb_requests")
+@Table(name = "requests")
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Request extends BaseEntity {
 

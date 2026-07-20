@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 
 @Entity
-@Table(name = "tb_invoices")
+@Table(name = "invoices")
 public class Invoice extends BaseEntity {
 
     @ManyToOne
