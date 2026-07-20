@@ -6,7 +6,7 @@ public record UserResponseDTO(Long id, String name, String email, String cpf, St
     public static UserResponseDTO fromEntity(User user) {
         return new UserResponseDTO(
                 user.getId(),
-                user.getFullName(),
+                user.getName(),
                 user.getEmail(),
                 user.getCpf(),
                 user.getClass().getSimpleName().toUpperCase() // Ex: CUSTOMER, MANAGER, ADMINISTRATOR

@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 public abstract class User extends BaseEntity {
 
     @Column(nullable = false, length = 150)
-    private String fullName;
+    private String name;
 
     @Column(nullable = false, unique = true, length = 11)
     private String cpf;
@@ -30,13 +30,13 @@ public abstract class User extends BaseEntity {
     }
 
     protected User(
-            String fullName,
+            String name,
             String cpf,
             String email,
             String password,
             String phone) {
 
-        this.fullName = fullName;
+        this.name = name;
         this.cpf = cpf;
         this.email = email;
         this.password = password;
@@ -44,12 +44,12 @@ public abstract class User extends BaseEntity {
         this.active = true;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getName() {
+        return name;
     }
 
     public void changeFullName(String fullName) {
-        this.fullName = fullName;
+        this.name = fullName;
     }
 
     public String getCpf() {

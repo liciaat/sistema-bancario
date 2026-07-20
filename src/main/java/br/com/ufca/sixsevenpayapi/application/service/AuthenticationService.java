@@ -1,11 +1,14 @@
 package br.com.ufca.sixsevenpayapi.application.service;
 
 import br.com.ufca.sixsevenpayapi.application.dto.LoginRequestDTO;
+import br.com.ufca.sixsevenpayapi.application.dto.RegisterRequestDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UpdatePasswordDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
 import br.com.ufca.sixsevenpayapi.domain.entity.Customer;
 import br.com.ufca.sixsevenpayapi.domain.entity.User;
+import br.com.ufca.sixsevenpayapi.domain.utils.EmailValidator;
+import br.com.ufca.sixsevenpayapi.domain.utils.PhoneValidator;
 import br.com.ufca.sixsevenpayapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,26 @@ public class AuthenticationService {
             throw new RuntimeException("Senha incorreta");
         }
         return UserResponseDTO.fromEntity(user);
+    }
+
+    @Transactional
+    public UserResponseDTO register(RegisterRequestDTO dto) {
+        String cleanCpf = CpfValidator.validateAndSanitizeCpf(dto.cpf());
+        if(userRepository.existsByCpf(cleanCpf)){
+            throw new RuntimeException("Usuário já cadastrado");
+        }
+        String cleanEmail = EmailValidator.validateAndSanitizeEmail(dto.email());
+        if(userRepository.existsByEmail(cleanEmail)){
+            throw new RuntimeException("Email já cadastrado");
+        }
+        String cleanPhone = PhoneValidator.validateAndSanitizePhone(dto.phoneNumber());
+
+        if(!dto.password().equals(dto.confirmPassword())){
+            throw new RuntimeException("Senhas não coincidem");
+        }
+        Customer customer = new Customer(dto.name(), cleanCpf, cleanEmail, dto.password(), cleanPhone);
+        Customer savedCustomer = userRepository.save(customer);
+        return UserResponseDTO.fromEntity(savedCustomer);
     }
 
     @Transactional
