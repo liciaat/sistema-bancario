@@ -1,6 +1,7 @@
 package br.com.ufca.sixsevenpayapi.application.service;
 
 import br.com.ufca.sixsevenpayapi.application.dto.LoginRequestDTO;
+import br.com.ufca.sixsevenpayapi.application.dto.UpdatePasswordDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
 import br.com.ufca.sixsevenpayapi.domain.entity.Customer;
@@ -33,19 +34,19 @@ public class AuthenticationService {
     }
 
     @Transactional
-    public void updatePassword(String cpf,String password, String newPassword){
-        String clearCpf = CpfValidator.validateAndSanitizeCpf(cpf);
+    public void updatePassword(UpdatePasswordDTO dto){
+        String clearCpf = CpfValidator.validateAndSanitizeCpf(dto.cpf());
         User user = userRepository.findByCpf(clearCpf);
         if(user == null){
             throw new RuntimeException("Usuário não existe");
         }
-        if(!password.equals(user.getPassword())){
+        if(!dto.password().equals(user.getPassword())){
             throw new RuntimeException("Senha incorreta");
         }
-        if(password.equals(newPassword)){
+        if(dto.password().equals(dto.newPassword())){
             throw new RuntimeException("Senha igual a anterior");
         }
-        user.changePassword(newPassword);
+        user.changePassword(dto.newPassword());
     }
 
     @Transactional
