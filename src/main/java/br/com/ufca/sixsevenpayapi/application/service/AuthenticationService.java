@@ -5,23 +5,27 @@ import br.com.ufca.sixsevenpayapi.application.dto.RegisterRequestDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UpdatePasswordDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
+import br.com.ufca.sixsevenpayapi.domain.entity.CheckingAccount;
 import br.com.ufca.sixsevenpayapi.domain.entity.Customer;
 import br.com.ufca.sixsevenpayapi.domain.entity.User;
 import br.com.ufca.sixsevenpayapi.domain.utils.EmailValidator;
 import br.com.ufca.sixsevenpayapi.domain.utils.PhoneValidator;
+import br.com.ufca.sixsevenpayapi.repository.AccountRepository;
 import br.com.ufca.sixsevenpayapi.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import br.com.ufca.sixsevenpayapi.domain.utils.CpfValidator;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
 
-    public AuthenticationService(UserRepository userRepository) {
+    public AuthenticationService(UserRepository userRepository, AccountRepository accountRepository) {
         this.userRepository = userRepository;
+        this.accountRepository = accountRepository;
     }
 
     public UserResponseDTO login(LoginRequestDTO dto) {
@@ -36,7 +40,7 @@ public class AuthenticationService {
         return UserResponseDTO.fromEntity(user);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public UserResponseDTO register(RegisterRequestDTO dto) {
         String cleanCpf = CpfValidator.validateAndSanitizeCpf(dto.cpf());
         if(userRepository.existsByCpf(cleanCpf)){
@@ -53,6 +57,11 @@ public class AuthenticationService {
         }
         Customer customer = new Customer(dto.name(), cleanCpf, cleanEmail, dto.password(), cleanPhone);
         Customer savedCustomer = userRepository.save(customer);
+
+        String accountNumber = generateAccountNumber();
+        Account initialAccount = new CheckingAccount(savedCustomer, accountNumber);
+        accountRepository.save(initialAccount);
+
         return UserResponseDTO.fromEntity(savedCustomer);
     }
 
@@ -87,6 +96,10 @@ public class AuthenticationService {
         }
         userRepository.deleteById(id);
 
+    }
+
+    private String generateAccountNumber() {
+        return String.format("%06d", (int) (Math.random() * 1_000_000));
     }
 
 }
