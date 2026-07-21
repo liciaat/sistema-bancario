@@ -28,6 +28,7 @@ public class AuthenticationService {
         this.accountRepository = accountRepository;
     }
 
+    @Transactional(readOnly = true)
     public UserResponseDTO login(LoginRequestDTO dto) {
         String clearCpf = CpfValidator.validateAndSanitizeCpf(dto.cpf());
         User user = userRepository.findByCpf(clearCpf);
@@ -40,7 +41,7 @@ public class AuthenticationService {
         return UserResponseDTO.fromEntity(user);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public UserResponseDTO register(RegisterRequestDTO dto) {
         String cleanCpf = CpfValidator.validateAndSanitizeCpf(dto.cpf());
         if(userRepository.existsByCpf(cleanCpf)){
@@ -58,7 +59,12 @@ public class AuthenticationService {
         Customer customer = new Customer(dto.name(), cleanCpf, cleanEmail, dto.password(), cleanPhone);
         Customer savedCustomer = userRepository.save(customer);
 
+
         String accountNumber = generateAccountNumber();
+        while (accountRepository.existsByAccountNumber(accountNumber)){
+            accountNumber = generateAccountNumber();
+        }
+
         Account initialAccount = new CheckingAccount(savedCustomer, accountNumber);
         accountRepository.save(initialAccount);
 
