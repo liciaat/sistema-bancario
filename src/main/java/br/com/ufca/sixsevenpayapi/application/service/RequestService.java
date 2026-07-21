@@ -7,8 +7,8 @@ import br.com.ufca.sixsevenpayapi.domain.entity.*;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
 import br.com.ufca.sixsevenpayapi.repository.*;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +123,7 @@ public class RequestService {
 
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<RequestResponseDTO> getRequestsByCustomer(Long customerId){
         List<Request> requests = requestRepository.findByCustomerId(customerId);
         List<RequestResponseDTO> requestsDTO = new ArrayList<>();
