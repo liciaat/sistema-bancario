@@ -10,6 +10,8 @@ import br.com.ufca.sixsevenpayapi.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static br.com.ufca.sixsevenpayapi.domain.utils.GenerateNumber.*;
@@ -100,6 +102,36 @@ public class RequestService {
 
         return RequestResponseDTO.fromEntity(updatedRequest);
 
+    }
+
+    @Transactional
+    public RequestResponseDTO rejectRequest(Long requestId, Long managerId){
+        if(!managerRepository.existsById(managerId)){
+            throw new RuntimeException("Id de Gerente inválido");
+        }
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Id da solicitação inválido"));
+
+        if (request.getStatus() != RequestStatus.PENDING) {
+            throw new RuntimeException("Apenas solicitações com status PENDENTE podem ser negadas");
+        }
+
+        request.setStatus(RequestStatus.REJECTED);
+        Request updatedRequest = requestRepository.save(request);
+
+        return RequestResponseDTO.fromEntity(updatedRequest);
+
+    }
+
+    @Transactional
+    public List<RequestResponseDTO> getRequestsByCustomer(Long customerId){
+        List<Request> requests = requestRepository.findByCustomerId(customerId);
+        List<RequestResponseDTO> requestsDTO = new ArrayList<>();
+
+        for(Request request : requests){
+            requestsDTO.add(RequestResponseDTO.fromEntity(request));
+        }
+        return requestsDTO;
     }
 
 
