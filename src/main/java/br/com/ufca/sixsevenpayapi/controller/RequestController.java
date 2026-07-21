@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api/requests")
 public class RequestController {
 
-    private RequestService requestService;
+    private final RequestService requestService;
     public RequestController(RequestService requestService) {
         this.requestService = requestService;
     }
