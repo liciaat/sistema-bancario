@@ -15,8 +15,10 @@ import br.com.ufca.sixsevenpayapi.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import br.com.ufca.sixsevenpayapi.domain.utils.CpfValidator;
 import org.springframework.transaction.annotation.Transactional;
+import static br.com.ufca.sixsevenpayapi.domain.utils.GenerateNumber.generateAccountNumber;
 
 import java.math.BigDecimal;
+
 
 @Service
 public class AuthenticationService {
@@ -104,8 +106,5 @@ public class AuthenticationService {
 
     }
 
-    private String generateAccountNumber() {
-        return String.format("%06d", (int) (Math.random() * 1_000_000));
-    }
 
 }

@@ -16,8 +16,8 @@ public class CreditRequest extends Request {
         super();
     }
 
-    public CreditRequest(BigDecimal requestedLimit) {
-        super();
+    public CreditRequest(Customer customer,BigDecimal requestedLimit) {
+        super(customer);
         this.requestedLimit = requestedLimit;
     }
 

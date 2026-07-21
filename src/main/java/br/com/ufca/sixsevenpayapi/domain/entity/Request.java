@@ -12,8 +12,20 @@ public abstract class Request extends BaseEntity {
     @Column(name = "status", nullable = false)
     private RequestStatus status;
 
+    @ManyToOne
+    @JoinColumn(name = "custome_id", nullable = false)
+    private Customer customer;
+
+    @Column(name = "reject_reason")
+    private String rejectReason;
+
     protected Request() {
         this.status = RequestStatus.PENDING;
+    }
+
+    public Request(Customer customer) {
+        this();
+        this.customer = customer;
     }
 
     public RequestStatus getStatus() {
@@ -22,5 +34,21 @@ public abstract class Request extends BaseEntity {
 
     public void setStatus(RequestStatus status) {
         this.status = status;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public String getRejectReason() {
+        return rejectReason;
+    }
+
+    public void setRejectReason(String rejectReason) {
+        this.rejectReason = rejectReason;
     }
 }

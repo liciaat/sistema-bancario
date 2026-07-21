@@ -14,8 +14,8 @@ public class AccountRequest extends Request {
         super();
     }
 
-    public AccountRequest(AccountType requestedAccountType) {
-        super();
+    public AccountRequest(Customer customer, AccountType requestedAccountType) {
+        super(customer);
         this.requestedAccountType = requestedAccountType;
     }
 
