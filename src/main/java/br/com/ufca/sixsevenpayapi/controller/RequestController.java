@@ -1,5 +1,6 @@
 package br.com.ufca.sixsevenpayapi.controller;
 
+import br.com.ufca.sixsevenpayapi.application.dto.ProcessRequestDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.CreditRequestDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.RequestResponseDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.SavingsAccountRequestDTO;
@@ -33,14 +34,14 @@ public class RequestController {
     }
 
     @PatchMapping("/{requestId}/approve")
-    public ResponseEntity<RequestResponseDTO> requestApprove(@PathVariable Long requestId, @RequestParam Long managerId) {
-         RequestResponseDTO response = requestService.approveRequest(requestId, managerId);
+    public ResponseEntity<RequestResponseDTO> requestApproved(@PathVariable Long requestId, @RequestBody ProcessRequestDTO dto) {
+         RequestResponseDTO response = requestService.approveRequest(requestId, dto.managerId());
          return ResponseEntity.ok().body(response);
     }
 
     @PatchMapping("/{requestId}/reject")
-    public ResponseEntity<RequestResponseDTO> requestReject(@PathVariable Long requestId, @RequestParam Long managerId) {
-        RequestResponseDTO response = requestService.rejectRequest(requestId, managerId);
+    public ResponseEntity<RequestResponseDTO> requestReject(@PathVariable Long requestId, @RequestBody ProcessRequestDTO dto) {
+        RequestResponseDTO response = requestService.rejectRequest(requestId, dto.managerId());
         return ResponseEntity.ok().body(response);
     }
 
