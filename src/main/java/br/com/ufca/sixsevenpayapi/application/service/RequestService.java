@@ -44,7 +44,7 @@ public class RequestService {
         Customer customer = customerRepository.findById(dto.customerId())
                 .orElseThrow(() -> new RuntimeException("Cliente com esse Id não existe"));
 
-        if(accountRepository.existsByCustomerIdAndType(dto.customerId(), AccountType.SAVINGS)){
+        if(accountRepository.existsByCustomerIdAndAccountType(dto.customerId(), AccountType.SAVINGS)){
             throw new RuntimeException("O cliente já tem uma conta poupança");
         }
 

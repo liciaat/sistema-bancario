@@ -1,6 +1,7 @@
 package br.com.ufca.sixsevenpayapi.domain.entity;
 
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
+import br.com.ufca.sixsevenpayapi.domain.enums.RequestType;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,6 +12,10 @@ public abstract class Request extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private RequestStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name ="request_type", nullable = false)
+    private RequestType type;
 
     @ManyToOne
     @JoinColumn(name = "custome_id", nullable = false)
@@ -23,8 +28,9 @@ public abstract class Request extends BaseEntity {
         this.status = RequestStatus.PENDING;
     }
 
-    public Request(Customer customer) {
+    public Request(Customer customer, RequestType type) {
         this();
+        this.type = type;
         this.customer = customer;
     }
 
@@ -50,5 +56,13 @@ public abstract class Request extends BaseEntity {
 
     public void setRejectReason(String rejectReason) {
         this.rejectReason = rejectReason;
+    }
+
+    public RequestType getType() {
+        return type;
+    }
+
+    public void setType(RequestType type) {
+        this.type = type;
     }
 }

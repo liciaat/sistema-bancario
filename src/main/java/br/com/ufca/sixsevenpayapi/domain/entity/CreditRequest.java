@@ -11,19 +11,13 @@ public class CreditRequest extends Request {
     @Column(name = "requested_limit", nullable = false, precision = 19, scale = 2)
     private BigDecimal requestedLimit;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name ="request_type", nullable = false)
-    private RequestType requestType;
-
-
     protected CreditRequest() {
         super();
     }
 
     public CreditRequest(Customer customer,BigDecimal requestedLimit) {
-        super(customer);
+        super(customer, RequestType.CREDIT);
         this.requestedLimit = requestedLimit;
-        this.requestType = RequestType.CREDIT;
     }
 
 
@@ -35,11 +29,4 @@ public class CreditRequest extends Request {
         this.requestedLimit = requestedLimit;
     }
 
-    public RequestType getRequestType() {
-        return requestType;
-    }
-
-    public void setRequestType(RequestType requestType) {
-        this.requestType = requestType;
-    }
 }

@@ -1,5 +1,6 @@
 package br.com.ufca.sixsevenpayapi.domain.entity;
 
+import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -13,6 +14,10 @@ public abstract class Account extends BaseEntity {
 
     @Column(name = "account_number", nullable = false, length = 9, unique = true)
     private String accountNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_type", nullable = false)
+    private AccountType accountType;
 
     @Column(name = "balance", nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
@@ -65,5 +70,13 @@ public abstract class Account extends BaseEntity {
 
     public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(AccountType accountType) {
+        this.accountType = accountType;
     }
 }
