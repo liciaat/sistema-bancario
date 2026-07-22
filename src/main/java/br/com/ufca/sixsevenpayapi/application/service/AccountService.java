@@ -5,7 +5,6 @@ import br.com.ufca.sixsevenpayapi.application.dto.TransactionResponseDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.TransferDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.WithdrawDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
-import br.com.ufca.sixsevenpayapi.domain.entity.CheckingAccount;
 import br.com.ufca.sixsevenpayapi.domain.entity.Transaction;
 import br.com.ufca.sixsevenpayapi.domain.enums.TransactionType;
 import br.com.ufca.sixsevenpayapi.repository.AccountRepository;
@@ -13,7 +12,6 @@ import br.com.ufca.sixsevenpayapi.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
