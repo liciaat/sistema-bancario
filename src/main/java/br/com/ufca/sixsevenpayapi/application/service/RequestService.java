@@ -6,6 +6,7 @@ import br.com.ufca.sixsevenpayapi.application.dto.SavingsAccountRequestDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.*;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
+import br.com.ufca.sixsevenpayapi.domain.enums.RequestType;
 import br.com.ufca.sixsevenpayapi.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +44,14 @@ public class RequestService {
         Customer customer = customerRepository.findById(dto.customerId())
                 .orElseThrow(() -> new RuntimeException("Cliente com esse Id não existe"));
 
+        if(accountRepository.existsByCustomerIdAndType(dto.customerId(), AccountType.SAVINGS)){
+            throw new RuntimeException("O cliente já tem uma conta poupança");
+        }
+
+        if(requestRepository.existsByCustomerIdAndTypeAndStatus(dto.customerId(), RequestType.ACCOUNT, RequestStatus.PENDING)){
+            throw new RuntimeException("O cliente já tem uma solicitação de conta pouopança pendente");
+        }
+
         AccountRequest request = new AccountRequest(customer, AccountType.SAVINGS);
         AccountRequest savedRequest = requestRepository.save(request);
         return RequestResponseDTO.fromEntity(savedRequest);
@@ -54,6 +63,10 @@ public class RequestService {
 
         Customer customer = customerRepository.findById(dto.customerId())
                 .orElseThrow(() -> new RuntimeException("Cliente com esse Id não existe"));
+
+        if(requestRepository.existsByCustomerIdAndTypeAndStatus(dto.customerId(), RequestType.CREDIT, RequestStatus.PENDING)){
+            throw new RuntimeException("O cliente já tem uma solicitação de crédito");
+        }
 
         CreditRequest request = new CreditRequest(customer, dto.requestedLimit());
         CreditRequest savedRequest = requestRepository.save(request);

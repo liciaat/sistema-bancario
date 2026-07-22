@@ -535,3 +535,6 @@ VALUES (1, 'Joao Costa', 'joao@email.com', '07194871378', '88999998889', 'senha1
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57)
 	at java.base/java.lang.Thread.run(Thread.java:1474)
+2026-07-22 13:40:52.558643-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "REQUEST_ACCOUNTS" not found; SQL statement:
+SELECT * FROM request_accounts [42102-240]
