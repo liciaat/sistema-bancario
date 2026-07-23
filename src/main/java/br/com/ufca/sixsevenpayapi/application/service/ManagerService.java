@@ -24,10 +24,5 @@ public class ManagerService {
         this.accountRepository = accountRepository;
     }
 
-    public AccountResponseDTO toggleAccountBlock(ToggleAccountBlockDTO dto){
-
-    }
-
-
 
 }
