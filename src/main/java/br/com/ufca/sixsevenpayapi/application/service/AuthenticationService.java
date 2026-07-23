@@ -4,6 +4,7 @@ import br.com.ufca.sixsevenpayapi.application.dto.LoginRequestDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.RegisterRequestDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UpdatePasswordDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
+import br.com.ufca.sixsevenpayapi.application.dto.DeleteOwnAccountRequestDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
 import br.com.ufca.sixsevenpayapi.domain.entity.CheckingAccount;
 import br.com.ufca.sixsevenpayapi.domain.entity.Customer;
@@ -106,9 +107,14 @@ public class AuthenticationService {
     }
 
     @Transactional
-    public void deleteOwnAccount(Long id){
-        User user = userRepository.findById(id)
+    public void deleteOwnAccount(DeleteOwnAccountRequestDTO dto){
+        User user = userRepository.findById(dto.accountId())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if(!dto.password().equals(user.getPassword())){
+            throw new RuntimeException("Senha incorreta");
+        }
+
         if (user instanceof Customer customer) {
             if (customer.getAccounts() != null && !customer.getAccounts().isEmpty()) {
                 if(customer.getCreditCard() != null && customer.getCreditCard().getCurrentSpending().compareTo(BigDecimal.ZERO) > 0){

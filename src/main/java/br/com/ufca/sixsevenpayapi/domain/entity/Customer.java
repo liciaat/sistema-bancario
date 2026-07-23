@@ -51,7 +51,7 @@ public class Customer extends User {
         return transactionPassword;
     }
 
-    public void setTranscationPassword(String transactionPassword) {
+    public void setTransactionPassword(String transactionPassword) {
         this.transactionPassword = transactionPassword;
     }
 }
