@@ -10,4 +10,6 @@ import java.util.List;
 public interface RequestRepository extends JpaRepository<Request, Long> {
     public List<Request> findByCustomerId(Long customerId);
     public boolean existsByCustomerIdAndTypeAndStatus(Long customerId, RequestType requestType, RequestStatus requestStatus);
+    public List<Request> findByStatus(RequestStatus status);
+
 }
