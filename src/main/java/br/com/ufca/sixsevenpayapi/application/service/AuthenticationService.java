@@ -64,11 +64,16 @@ public class AuthenticationService {
             throw new RuntimeException("Telefone já cadastrado");
         }
 
-
         if(!dto.password().equals(dto.confirmPassword())){
             throw new RuntimeException("Senhas não coincidem");
         }
-        Customer customer = new Customer(dto.name(), cleanCpf, cleanEmail, dto.password(), cleanPhone);
+
+        if(!dto.confirmTransactionPassword().equals(dto.transactionPassword())){
+            throw new RuntimeException("Senhas de transação não coincidem");
+
+        }
+
+        Customer customer = new Customer(dto.name(), cleanCpf, cleanEmail, dto.password(), cleanPhone, dto.transactionPassword());
         Customer savedCustomer = userRepository.save(customer);
 
 

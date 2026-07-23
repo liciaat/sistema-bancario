@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 
 public record PurchaseDTO(@Valid @NotBlank(message = "O numero do cartão é obrigatório")
                           String cardNumber,
+                          @Valid @NotBlank(message = "A senha de transação é obrigatória")
+                          String transactionPassword,
                           @Valid @NotBlank(message = "O cvv do cartão é obrigatório")
                           String cvv,
                           @NotNull(message = "O valor é obrigatório")

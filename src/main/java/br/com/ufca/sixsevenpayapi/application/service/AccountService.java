@@ -55,6 +55,10 @@ public class AccountService {
             throw new RuntimeException("Operação não permitida: A conta origem está bloqueada ou inativa.");
         }
 
+        if(!transferDTO.transactionPassword().equals(sourceAccount.getCustomer().getTranscationPassword())){
+            throw new RuntimeException("Senha de transação incorreta!");
+        }
+
         Account targetAccount = accountRepository.findByAccountNumber(transferDTO.targetAccountNumber())
                 .orElseThrow(()->new RuntimeException("Conta destino não encontrada"));
 
@@ -94,9 +98,16 @@ public class AccountService {
         if (account.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new RuntimeException("Operação não permitida: A conta está bloqueada ou inativa.");
         }
+
+        if(!dto.transactionPassword().equals(account.getCustomer().getTranscationPassword())){
+            throw new RuntimeException("Senha de transação incorreta!");
+        }
+
         if(account.getBalance().compareTo(dto.amount()) < 0){
             throw new RuntimeException("Saldo insuficiente para saque");
         }
+
+
         account.setBalance(account.getBalance().subtract(dto.amount()));
         accountRepository.save(account);
         Transaction transaction = new Transaction(account, dto.amount().negate(), TransactionType.WITHDRAW);
@@ -117,6 +128,10 @@ public class AccountService {
 
         if (sourceAccount.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new RuntimeException("Operação não permitida: A conta origem está bloqueada ou inativa.");
+        }
+
+        if(!dto.transactionPassword().equals(sourceAccount.getCustomer().getTranscationPassword())){
+            throw new RuntimeException("Senha de transação incorreta!");
         }
 
         if(sourceAccount.getBalance().compareTo(dto.amount()) < 0){

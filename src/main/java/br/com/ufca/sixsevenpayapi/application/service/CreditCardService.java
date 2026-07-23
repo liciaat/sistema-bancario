@@ -45,6 +45,10 @@ public class CreditCardService {
             throw new RuntimeException("Cliente inativo");
         }
 
+        if(!dto.transactionPassword().equals(creditCard.getCustomer().getTranscationPassword())){
+            throw  new RuntimeException("Senha de transação incorreta");
+        }
+
         if(!dto.cvv().equals(creditCard.getCvv())){
             throw new RuntimeException("CVV inválido");
         }
@@ -100,6 +104,10 @@ public class CreditCardService {
 
         if(account.getAccountStatus() != AccountStatus.ACTIVE){
             throw new RuntimeException("A conta está bloqueada");
+        }
+
+        if(!dto.transactionPassword().equals(account.getCustomer().getTranscationPassword())){
+            throw new RuntimeException("Senha de transação incorreta");
         }
 
         if(account.getBalance().compareTo(invoice.getTotalAmount()) < 0){
