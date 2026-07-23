@@ -24,9 +24,9 @@ public class CreditCardController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/invoices/invoice")
-    public ResponseEntity<InvoiceResponseDTO> getInvoice(@Valid @RequestBody InvoiceDTO dto){
-        InvoiceResponseDTO response = creditCardService.getInvoice(dto);
+    @GetMapping("/invoices/{invoiceId}")
+    public ResponseEntity<InvoiceResponseDTO> getInvoice(@RequestParam Long invoiceId){
+        InvoiceResponseDTO response = creditCardService.getInvoice(invoiceId);
         return ResponseEntity.ok(response);
     }
 

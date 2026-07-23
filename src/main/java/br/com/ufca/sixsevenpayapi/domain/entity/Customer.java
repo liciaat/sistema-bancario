@@ -15,8 +15,8 @@ public class Customer extends User {
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private CreditCard creditCard;
 
-    @Column(name = "transcation_password", nullable = false)
-    private String transcationPassword;
+    @Column(name = "transaction_password", nullable = false)
+    private String transactionPassword;
 
     public Customer() {
     }
@@ -26,9 +26,9 @@ public class Customer extends User {
                     String email,
                     String password,
                     String phone,
-                    String transcationPassword) {
+                    String transactionPassword) {
         super(fullName, cpf, email, password,phone);
-        this.transcationPassword = transcationPassword;
+        this.transactionPassword = transactionPassword;
     }
 
     public List<Account> getAccounts() {
@@ -47,11 +47,11 @@ public class Customer extends User {
         this.accounts = accounts;
     }
 
-    public String getTranscationPassword() {
-        return transcationPassword;
+    public String getTransactionPassword() {
+        return transactionPassword;
     }
 
-    public void setTranscationPassword(String transcationPassword) {
-        this.transcationPassword = transcationPassword;
+    public void setTranscationPassword(String transactionPassword) {
+        this.transactionPassword = transactionPassword;
     }
 }

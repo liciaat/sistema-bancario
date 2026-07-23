@@ -6,11 +6,11 @@ import java.math.BigDecimal;
 
 public record CreditCardResponseDTO(
         Long id,
-        String carNumber,
+        String cardNumber,
         String cvv,
         BigDecimal creditLimit,
         BigDecimal currentSpending,
-        BigDecimal avaibleLimit
+        BigDecimal availableLimit
 ) {
     public static CreditCardResponseDTO fromEntity(CreditCard creditCard) {
         return new CreditCardResponseDTO(

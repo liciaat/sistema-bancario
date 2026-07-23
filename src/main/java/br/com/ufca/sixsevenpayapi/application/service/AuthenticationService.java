@@ -8,6 +8,7 @@ import br.com.ufca.sixsevenpayapi.domain.entity.Account;
 import br.com.ufca.sixsevenpayapi.domain.entity.CheckingAccount;
 import br.com.ufca.sixsevenpayapi.domain.entity.Customer;
 import br.com.ufca.sixsevenpayapi.domain.entity.User;
+import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
 import br.com.ufca.sixsevenpayapi.domain.utils.EmailValidator;
 import br.com.ufca.sixsevenpayapi.domain.utils.PhoneValidator;
 import br.com.ufca.sixsevenpayapi.repository.AccountRepository;
@@ -110,15 +111,19 @@ public class AuthenticationService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         if (user instanceof Customer customer) {
             if (customer.getAccounts() != null && !customer.getAccounts().isEmpty()) {
+                if(customer.getCreditCard() != null && customer.getCreditCard().getCurrentSpending().compareTo(BigDecimal.ZERO) > 0){
+                    throw new RuntimeException("Não é possível excluir o perfil: ainda existe divida no cartão de crédito");
+                }
+
                 for (Account account : customer.getAccounts()) {
                     if (account.getBalance() != null && account.getBalance().compareTo(BigDecimal.ZERO) != 0) {
                         throw new RuntimeException("Não é possível excluir o perfil: ainda existe saldo na conta " + account.getAccountNumber());
                     }
+                    account.setAccountStatus(AccountStatus.CLOSED);
                 }
             }
         }
-        userRepository.deleteById(id);
-
+        user.deactivate();
     }
 
 

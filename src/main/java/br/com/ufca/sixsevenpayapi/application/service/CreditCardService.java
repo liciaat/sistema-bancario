@@ -45,7 +45,7 @@ public class CreditCardService {
             throw new RuntimeException("Cliente inativo");
         }
 
-        if(!dto.transactionPassword().equals(creditCard.getCustomer().getTranscationPassword())){
+        if(!dto.transactionPassword().equals(creditCard.getCustomer().getTransactionPassword())){
             throw  new RuntimeException("Senha de transação incorreta");
         }
 
@@ -80,8 +80,8 @@ public class CreditCardService {
     }
 
     @Transactional(readOnly = true)
-    public InvoiceResponseDTO getInvoice(InvoiceDTO dto){
-        Invoice invoice = invoiceRepository.findById(dto.invoiceId())
+    public InvoiceResponseDTO getInvoice(Long invoiceId){
+        Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("Fatura não encontrada"));
 
         return InvoiceResponseDTO.fromEntity(invoice);
@@ -106,7 +106,7 @@ public class CreditCardService {
             throw new RuntimeException("A conta está bloqueada");
         }
 
-        if(!dto.transactionPassword().equals(account.getCustomer().getTranscationPassword())){
+        if(!dto.transactionPassword().equals(account.getCustomer().getTransactionPassword())){
             throw new RuntimeException("Senha de transação incorreta");
         }
 

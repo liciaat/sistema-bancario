@@ -1,6 +1,7 @@
 package br.com.ufca.sixsevenpayapi.application.service;
 
 import br.com.ufca.sixsevenpayapi.application.dto.CreditRequestDTO;
+import br.com.ufca.sixsevenpayapi.application.dto.ProcessRequestDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.RequestResponseDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.SavingsAccountRequestDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.*;
@@ -83,12 +84,16 @@ public class RequestService {
     }
 
     @Transactional
-    public RequestResponseDTO approveRequest(Long requestId, Long managerId){
+    public RequestResponseDTO approveRequest(ProcessRequestDTO dto){
 
-        if(!managerRepository.existsById(managerId)){
-            throw new RuntimeException("Id de Gerente inválido");
+        Manager manager = managerRepository.findById(dto.managerId())
+                .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+
+        if(!dto.managerPassword().equals(manager.getPassword())){
+            throw new RuntimeException("A senha do gerente está incorreta");
         }
-        Request request = requestRepository.findById(requestId)
+
+        Request request = requestRepository.findById(dto.requestId())
                 .orElseThrow(() -> new RuntimeException("Id da solicitação inválido"));
 
         if (request.getStatus() != RequestStatus.PENDING) {
@@ -130,11 +135,16 @@ public class RequestService {
     }
 
     @Transactional
-    public RequestResponseDTO rejectRequest(Long requestId, Long managerId){
-        if(!managerRepository.existsById(managerId)){
-            throw new RuntimeException("Id de Gerente inválido");
+    public RequestResponseDTO rejectRequest(ProcessRequestDTO dto){
+
+        Manager manager = managerRepository.findById(dto.managerId())
+                .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+
+        if(!dto.managerPassword().equals(manager.getPassword())){
+            throw new RuntimeException("A senha do gerente está incorreta");
         }
-        Request request = requestRepository.findById(requestId)
+
+        Request request = requestRepository.findById(dto.requestId())
                 .orElseThrow(() -> new RuntimeException("Id da solicitação inválido"));
 
         if (request.getStatus() != RequestStatus.PENDING) {

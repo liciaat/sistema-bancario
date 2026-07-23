@@ -55,7 +55,7 @@ public class AccountService {
             throw new RuntimeException("Operação não permitida: A conta origem está bloqueada ou inativa.");
         }
 
-        if(!transferDTO.transactionPassword().equals(sourceAccount.getCustomer().getTranscationPassword())){
+        if(!transferDTO.transactionPassword().equals(sourceAccount.getCustomer().getTransactionPassword())){
             throw new RuntimeException("Senha de transação incorreta!");
         }
 
@@ -99,7 +99,7 @@ public class AccountService {
             throw new RuntimeException("Operação não permitida: A conta está bloqueada ou inativa.");
         }
 
-        if(!dto.transactionPassword().equals(account.getCustomer().getTranscationPassword())){
+        if(!dto.transactionPassword().equals(account.getCustomer().getTransactionPassword())){
             throw new RuntimeException("Senha de transação incorreta!");
         }
 
@@ -130,7 +130,7 @@ public class AccountService {
             throw new RuntimeException("Operação não permitida: A conta origem está bloqueada ou inativa.");
         }
 
-        if(!dto.transactionPassword().equals(sourceAccount.getCustomer().getTranscationPassword())){
+        if(!dto.transactionPassword().equals(sourceAccount.getCustomer().getTransactionPassword())){
             throw new RuntimeException("Senha de transação incorreta!");
         }
 

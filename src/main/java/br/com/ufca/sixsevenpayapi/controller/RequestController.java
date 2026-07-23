@@ -33,15 +33,15 @@ public class RequestController {
 
     }
 
-    @PatchMapping("/{requestId}/approve")
-    public ResponseEntity<RequestResponseDTO> requestApproved(@PathVariable Long requestId, @RequestBody ProcessRequestDTO dto) {
-         RequestResponseDTO response = requestService.approveRequest(requestId, dto.managerId());
+    @PatchMapping("/request/approve")
+    public ResponseEntity<RequestResponseDTO> requestApproved(@Valid @RequestBody ProcessRequestDTO dto) {
+         RequestResponseDTO response = requestService.approveRequest(dto);
          return ResponseEntity.ok().body(response);
     }
 
-    @PatchMapping("/{requestId}/reject")
-    public ResponseEntity<RequestResponseDTO> requestReject(@PathVariable Long requestId, @RequestBody ProcessRequestDTO dto) {
-        RequestResponseDTO response = requestService.rejectRequest(requestId, dto.managerId());
+    @PatchMapping("/request/reject")
+    public ResponseEntity<RequestResponseDTO> requestReject(@Valid @RequestBody ProcessRequestDTO dto) {
+        RequestResponseDTO response = requestService.rejectRequest(dto);
         return ResponseEntity.ok().body(response);
     }
 
