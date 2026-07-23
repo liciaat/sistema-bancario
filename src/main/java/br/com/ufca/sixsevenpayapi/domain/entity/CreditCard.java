@@ -19,6 +19,9 @@ public class CreditCard extends BaseEntity {
     @Column(name = "current_spending", nullable = false, precision = 19, scale = 2)
     private BigDecimal currentSpending;
 
+    @Column(name = "cvv", nullable = false, length = 3)
+    private String cvv;
+
     @OneToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
@@ -30,11 +33,12 @@ public class CreditCard extends BaseEntity {
         super();
     }
 
-    public CreditCard(BigDecimal creditLimit, String cardNumber, Customer customer) {
+    public CreditCard(BigDecimal creditLimit, String cardNumber, Customer customer,String cvv) {
         this.creditLimit = creditLimit;
         this.cardNumber = cardNumber;
         this.customer = customer;
         this.currentSpending = BigDecimal.ZERO;
+        this.cvv = cvv;
     }
 
     public String getCardNumber() {
@@ -75,5 +79,13 @@ public class CreditCard extends BaseEntity {
 
     public void setInvoices(List<Invoice> invoices) {
         this.invoices = invoices;
+    }
+
+    public String getCvv() {
+        return cvv;
+    }
+
+    public void setCvv(String cvv) {
+        this.cvv = cvv;
     }
 }

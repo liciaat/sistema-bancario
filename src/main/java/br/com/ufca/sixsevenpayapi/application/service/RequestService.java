@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static br.com.ufca.sixsevenpayapi.domain.utils.CvvGenerator.generateCvv;
 import static br.com.ufca.sixsevenpayapi.domain.utils.GenerateNumber.*;
 
 @Service
@@ -116,7 +117,7 @@ public class RequestService {
                 while (creditCardRepository.existsByCardNumber( cardNumber)){
                     cardNumber = generateCardNumber();
                 }
-                CreditCard newCreditCard = new CreditCard(creditReq.getRequestedLimit(), cardNumber, creditReq.getCustomer());
+                CreditCard newCreditCard = new CreditCard(creditReq.getRequestedLimit(), cardNumber, creditReq.getCustomer(), generateCvv());
                 creditCardRepository.save(newCreditCard);
             }
 
