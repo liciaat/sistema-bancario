@@ -68,6 +68,14 @@ public class RequestService {
             throw new RuntimeException("O cliente já tem uma solicitação de crédito");
         }
 
+        if(creditCardRepository.existsByCustomerId(customer.getId())){
+            Optional<CreditCard> creditCard = creditCardRepository.findByCustomerId(customer.getId());
+            if(dto.requestedLimit().compareTo(creditCard.get().getCurrentSpending()) < 0){
+                throw new RuntimeException("Solicitação de crédito menor que a fatura atual");
+            }
+        }
+
+
         CreditRequest request = new CreditRequest(customer, dto.requestedLimit());
         CreditRequest savedRequest = requestRepository.save(request);
         return RequestResponseDTO.fromEntity(savedRequest);
@@ -98,6 +106,9 @@ public class RequestService {
 
             if(existingCard.isPresent()){
                 CreditCard creditCard = existingCard.get();
+                if(creditReq.getRequestedLimit().compareTo(creditCard.getCurrentSpending()) < 0){
+                    throw new RuntimeException("Solicitação de crédito menor que a fatura atual");
+                }
                 creditCard.setCreditLimit(creditReq.getRequestedLimit());
                 creditCardRepository.save(creditCard);
             }else{

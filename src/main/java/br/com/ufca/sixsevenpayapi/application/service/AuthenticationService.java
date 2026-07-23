@@ -54,6 +54,10 @@ public class AuthenticationService {
             throw new RuntimeException("Email já cadastrado");
         }
         String cleanPhone = PhoneValidator.validateAndSanitizePhone(dto.phoneNumber());
+        if(userRepository.existsByPhone(cleanPhone)){
+            throw new RuntimeException("Telefone já cadastrado");
+        }
+
 
         if(!dto.password().equals(dto.confirmPassword())){
             throw new RuntimeException("Senhas não coincidem");
