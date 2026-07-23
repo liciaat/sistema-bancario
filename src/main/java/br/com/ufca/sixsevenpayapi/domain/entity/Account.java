@@ -1,5 +1,6 @@
 package br.com.ufca.sixsevenpayapi.domain.entity;
 
+import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 import jakarta.persistence.*;
 
@@ -22,6 +23,9 @@ public abstract class Account extends BaseEntity {
     @Column(name = "balance", nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
 
+    @Column(name = "account_status", nullable = false)
+    private AccountStatus accountStatus;
+
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
@@ -31,10 +35,12 @@ public abstract class Account extends BaseEntity {
 
     protected Account() {
         super();
+        this.accountStatus = AccountStatus.ACTIVE;
     }
 
     public Account(Customer customer, String accountNumber) {
         super();
+        this.accountStatus = AccountStatus.ACTIVE;
         this.customer = customer;
         this.accountNumber = accountNumber;
         this.balance = BigDecimal.ZERO;
@@ -78,5 +84,13 @@ public abstract class Account extends BaseEntity {
 
     public void setAccountType(AccountType accountType) {
         this.accountType = accountType;
+    }
+
+    public AccountStatus getAccountStatus() {
+        return accountStatus;
+    }
+
+    public void setAccountStatus(AccountStatus accountStatus) {
+        this.accountStatus = accountStatus;
     }
 }

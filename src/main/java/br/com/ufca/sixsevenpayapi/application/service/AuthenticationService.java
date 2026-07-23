@@ -32,8 +32,10 @@ public class AuthenticationService {
 
     @Transactional(readOnly = true)
     public UserResponseDTO login(LoginRequestDTO dto) {
+
         String clearCpf = CpfValidator.validateAndSanitizeCpf(dto.cpf());
         User user = userRepository.findByCpf(clearCpf);
+
         if(user == null){
             throw new RuntimeException("Usuário não existe");
         }
