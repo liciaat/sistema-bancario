@@ -1,18 +1,17 @@
 package br.com.ufca.sixsevenpayapi.application.service;
 
-import br.com.ufca.sixsevenpayapi.application.dto.PurchaseDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.PurchaseResponseDTO;
-import br.com.ufca.sixsevenpayapi.domain.entity.CreditCard;
-import br.com.ufca.sixsevenpayapi.domain.entity.Invoice;
-import br.com.ufca.sixsevenpayapi.domain.entity.Purchase;
+import br.com.ufca.sixsevenpayapi.application.dto.*;
+import br.com.ufca.sixsevenpayapi.domain.entity.*;
+import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.InvoiceStatus;
-import br.com.ufca.sixsevenpayapi.repository.CreditCardRepository;
-import br.com.ufca.sixsevenpayapi.repository.InvoiceRepository;
-import br.com.ufca.sixsevenpayapi.repository.PurchaseRepository;
+import br.com.ufca.sixsevenpayapi.domain.enums.TransactionType;
+import br.com.ufca.sixsevenpayapi.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,11 +20,19 @@ public class CreditCardService {
     private final CreditCardRepository creditCardRepository;
     private final InvoiceRepository invoiceRepository;
     private final PurchaseRepository purchaseRepository;
-    public CreditCardService(CreditCardRepository creditCardRepository, InvoiceRepository invoiceRepository, PurchaseRepository purchaseRepository) {
+    private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
+
+    public CreditCardService(CreditCardRepository creditCardRepository,
+                             InvoiceRepository invoiceRepository,
+                             PurchaseRepository purchaseRepository,
+                             AccountRepository accountRepository,
+                             TransactionRepository transactionRepository) {
         this.creditCardRepository = creditCardRepository;
         this.invoiceRepository = invoiceRepository;
         this.purchaseRepository = purchaseRepository;
-
+        this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
 
@@ -65,6 +72,74 @@ public class CreditCardService {
         openInvoice.setTotalAmount(openInvoice.getTotalAmount().add(dto.amount()));
         invoiceRepository.save(openInvoice);
         return PurchaseResponseDTO.fromEntity(purchase);
+
+    }
+
+    @Transactional(readOnly = true)
+    public InvoiceResponseDTO getInvoice(InvoiceDTO dto){
+        Invoice invoice = invoiceRepository.findById(dto.invoiceId())
+                .orElseThrow(() -> new RuntimeException("Fatura não encontrada"));
+
+        return InvoiceResponseDTO.fromEntity(invoice);
+    }
+
+    @Transactional
+    public InvoiceResponseDTO payInvoice(PayInvoiceDTO dto){
+        Invoice invoice = invoiceRepository.findById(dto.invoiceId())
+                .orElseThrow(() -> new RuntimeException("Fatura não encontrada"));
+        if(invoice.getStatus().equals(InvoiceStatus.PAID)){
+            throw new RuntimeException("Esta fatura já está paga");
+        }
+
+        Account account = accountRepository.findByAccountNumber(dto.accountNumber())
+                .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
+
+        if(!account.getCustomer().equals(invoice.getCreditCard().getCustomer())){
+            throw new RuntimeException("A conta informada não pertence ao titular do cartão");
+        }
+
+        if(account.getAccountStatus() != AccountStatus.ACTIVE){
+            throw new RuntimeException("A conta está bloqueada");
+        }
+
+        if(account.getBalance().compareTo(invoice.getTotalAmount()) < 0){
+            throw new RuntimeException("Saldo insuficiente para pagar a fatura");
+        }
+
+        account.setBalance(account.getBalance().subtract(invoice.getTotalAmount()));
+        accountRepository.save(account);
+
+        Transaction transaction = new Transaction(account, invoice.getTotalAmount().negate(), TransactionType.INVOICE);
+        transactionRepository.save(transaction);
+
+        invoice.setStatus(InvoiceStatus.PAID);
+        invoiceRepository.save(invoice);
+
+        CreditCard creditCard = invoice.getCreditCard();
+        creditCard.setCurrentSpending(creditCard.getCurrentSpending().subtract(invoice.getTotalAmount()));
+        creditCardRepository.save(creditCard);
+
+        return InvoiceResponseDTO.fromEntity(invoice);
+    }
+
+    @Transactional(readOnly = true)
+    public CreditCardResponseDTO getCreditCardByCustomer(Long customerId){
+        CreditCard creditCard = creditCardRepository.findByCustomerId(customerId)
+                .orElseThrow(() -> new RuntimeException("Cliente não possui cartão de crédito"));
+        return CreditCardResponseDTO.fromEntity(creditCard);
+    }
+
+    @Transactional(readOnly = true)
+    public List<InvoiceResponseDTO> getCustomerInvoices(Long customerId){
+        CreditCard creditCard = creditCardRepository.findByCustomerId(customerId)
+                .orElseThrow(() -> new RuntimeException("Cliente não possui cartão de crédito"));
+
+        List<Invoice> invoices = creditCard.getInvoices();
+        List<InvoiceResponseDTO> dtos = new ArrayList<>();
+        for(Invoice invoice : invoices){
+            dtos.add(InvoiceResponseDTO.fromEntity(invoice));
+        }
+        return dtos;
 
     }
 
