@@ -15,10 +15,12 @@ public record AccountResponseDTO(
         String name
 ) {
     public static AccountResponseDTO fromEntity(Account account) {
+        AccountType accountType;
+
         if(account instanceof CheckingAccount){
-            AccountType accountType = AccountType.CHECKING;
+            accountType = AccountType.CHECKING;
         }else {
-            AccountType accountType = AccountType.SAVINGS;
+            accountType = AccountType.SAVINGS;
         }
 
         return new AccountResponseDTO(
