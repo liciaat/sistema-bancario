@@ -1,7 +1,6 @@
 package br.com.ufca.sixsevenpayapi.repository;
 
 import br.com.ufca.sixsevenpayapi.domain.entity.Request;
-import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestType;
 import org.springframework.data.jpa.repository.JpaRepository;

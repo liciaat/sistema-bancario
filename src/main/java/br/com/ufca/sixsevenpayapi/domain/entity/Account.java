@@ -8,9 +8,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
 @Table(name = "accounts")
 @Inheritance(strategy = InheritanceType.JOINED)
+
 public abstract class Account extends BaseEntity {
 
     @Column(name = "account_number", nullable = false, length = 9, unique = true)

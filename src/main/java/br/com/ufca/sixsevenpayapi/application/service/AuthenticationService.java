@@ -36,8 +36,12 @@ public class AuthenticationService {
         String clearCpf = CpfValidator.validateAndSanitizeCpf(dto.cpf());
         User user = userRepository.findByCpf(clearCpf);
 
+
         if(user == null){
             throw new RuntimeException("Usuário não existe");
+        }
+        if(!user.isActive()){
+            throw new RuntimeException("Usuário não está  ativo");
         }
         if(!dto.password().equals(user.getPassword())){
             throw new RuntimeException("Senha incorreta");

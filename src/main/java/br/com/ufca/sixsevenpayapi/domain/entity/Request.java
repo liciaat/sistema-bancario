@@ -21,9 +21,6 @@ public abstract class Request extends BaseEntity {
     @JoinColumn(name = "custome_id", nullable = false)
     private Customer customer;
 
-    @Column(name = "reject_reason")
-    private String rejectReason;
-
     protected Request() {
         this.status = RequestStatus.PENDING;
     }
@@ -48,14 +45,6 @@ public abstract class Request extends BaseEntity {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
-    }
-
-    public String getRejectReason() {
-        return rejectReason;
-    }
-
-    public void setRejectReason(String rejectReason) {
-        this.rejectReason = rejectReason;
     }
 
     public RequestType getType() {

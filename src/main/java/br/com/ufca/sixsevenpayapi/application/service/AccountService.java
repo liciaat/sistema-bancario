@@ -73,10 +73,10 @@ public class AccountService {
 
         sourceAccount.setBalance(sourceAccount.getBalance().subtract(transferDTO.amount()));
         accountRepository.save(sourceAccount);
-        targetAccount.setBalance(targetAccount.getBalance().subtract(transferDTO.amount()));
+        targetAccount.setBalance(targetAccount.getBalance().add(transferDTO.amount()));
         accountRepository.save(targetAccount);
 
-        Transaction sourceTransaction = new Transaction(sourceAccount, transferDTO.amount(), TransactionType.TRANSFER);
+        Transaction sourceTransaction = new Transaction(sourceAccount, transferDTO.amount().negate(), TransactionType.TRANSFER);
         transactionRepository.save(sourceTransaction);
 
         Transaction targetTransaction = new Transaction(targetAccount, transferDTO.amount(), TransactionType.TRANSFER);
@@ -99,7 +99,7 @@ public class AccountService {
         }
         account.setBalance(account.getBalance().subtract(dto.amount()));
         accountRepository.save(account);
-        Transaction transaction = new Transaction(account, dto.amount(), TransactionType.WITHDRAW);
+        Transaction transaction = new Transaction(account, dto.amount().negate(), TransactionType.WITHDRAW);
         transactionRepository.save(transaction);
         return TransactionResponseDTO.fromEntity(transaction);
 
@@ -135,7 +135,7 @@ public class AccountService {
         targetAccount.setBalance(targetAccount.getBalance().add(dto.amount()));
         accountRepository.save(targetAccount);
 
-        Transaction sourceTransaction = new Transaction(sourceAccount, dto.amount(), TransactionType.TRANSFER);
+        Transaction sourceTransaction = new Transaction(sourceAccount, dto.amount().negate(), TransactionType.TRANSFER);
         transactionRepository.save(sourceTransaction);
         Transaction targetTransaction = new Transaction(targetAccount, dto.amount(), TransactionType.TRANSFER);
         transactionRepository.save(targetTransaction);

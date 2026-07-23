@@ -24,7 +24,7 @@ public record RequestResponseDTO(
         BigDecimal limit = null;
 
         if (request instanceof AccountRequest accountReq &&  accountReq.getRequestedAccountType() != null) {
-                accountTypeStr = accountReq.getRequestedAccountType().name();
+            accountTypeStr = accountReq.getRequestedAccountType().name();
         } else if (request instanceof CreditRequest creditReq) {
             limit = creditReq.getRequestedLimit();
         }

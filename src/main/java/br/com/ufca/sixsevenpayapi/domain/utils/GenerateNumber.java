@@ -1,7 +1,5 @@
 package br.com.ufca.sixsevenpayapi.domain.utils;
 
-import org.jspecify.annotations.NonNull;
-
 import java.util.Random;
 
 public class GenerateNumber {

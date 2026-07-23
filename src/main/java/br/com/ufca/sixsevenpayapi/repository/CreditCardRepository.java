@@ -1,8 +1,6 @@
 package br.com.ufca.sixsevenpayapi.repository;
 
 import br.com.ufca.sixsevenpayapi.domain.entity.CreditCard;
-import br.com.ufca.sixsevenpayapi.domain.entity.Request;
-import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
