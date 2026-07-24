@@ -124,8 +124,11 @@ public class AuthenticationService {
 
             ClosureRequest request = new ClosureRequest(customer);
             requestRepository.save(request);
-        }else {
-            throw new RuntimeException("Apenas cliente podem solicitar encerramento da conta por este canal");
+        }else if(user instanceof Manager){
+            user.deactivate();
+            userRepository.save(user);
+        }else{
+            throw new RuntimeException("Admin não pode solicitar a exclusão da própria conta");
         }
 
     }
