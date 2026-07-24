@@ -5,14 +5,14 @@ import br.com.ufca.sixsevenpayapi.application.dto.RegisterRequestDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UpdatePasswordDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.DeleteOwnAccountRequestDTO;
-import br.com.ufca.sixsevenpayapi.domain.entity.Account;
-import br.com.ufca.sixsevenpayapi.domain.entity.CheckingAccount;
-import br.com.ufca.sixsevenpayapi.domain.entity.Customer;
-import br.com.ufca.sixsevenpayapi.domain.entity.User;
+import br.com.ufca.sixsevenpayapi.domain.entity.*;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
+import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
+import br.com.ufca.sixsevenpayapi.domain.enums.RequestType;
 import br.com.ufca.sixsevenpayapi.domain.utils.EmailValidator;
 import br.com.ufca.sixsevenpayapi.domain.utils.PhoneValidator;
 import br.com.ufca.sixsevenpayapi.repository.AccountRepository;
+import br.com.ufca.sixsevenpayapi.repository.RequestRepository;
 import br.com.ufca.sixsevenpayapi.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import br.com.ufca.sixsevenpayapi.domain.utils.CpfValidator;
@@ -26,10 +26,12 @@ import java.math.BigDecimal;
 public class AuthenticationService {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    private final RequestRepository requestRepository;
 
-    public AuthenticationService(UserRepository userRepository, AccountRepository accountRepository) {
+    public AuthenticationService(UserRepository userRepository, AccountRepository accountRepository, RequestRepository requestRepository) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
+        this.requestRepository = requestRepository;
     }
 
     @Transactional(readOnly = true)
@@ -116,20 +118,16 @@ public class AuthenticationService {
         }
 
         if (user instanceof Customer customer) {
-            if (customer.getAccounts() != null && !customer.getAccounts().isEmpty()) {
-                if(customer.getCreditCard() != null && customer.getCreditCard().getCurrentSpending().compareTo(BigDecimal.ZERO) > 0){
-                    throw new RuntimeException("Não é possível excluir o perfil: ainda existe divida no cartão de crédito");
-                }
-
-                for (Account account : customer.getAccounts()) {
-                    if (account.getBalance() != null && account.getBalance().compareTo(BigDecimal.ZERO) != 0) {
-                        throw new RuntimeException("Não é possível excluir o perfil: ainda existe saldo na conta " + account.getAccountNumber());
-                    }
-                    account.setAccountStatus(AccountStatus.CLOSED);
-                }
+            if(requestRepository.existsByCustomerIdAndTypeAndStatus(customer.getId(), RequestType.CLOSURE, RequestStatus.PENDING)){
+                throw new RuntimeException("Já existe uma solicitação de encerramento pendente para esta conta");
             }
+
+            ClosureRequest request = new ClosureRequest(customer);
+            requestRepository.save(request);
+        }else {
+            throw new RuntimeException("Apenas cliente podem solicitar encerramento da conta por este canal");
         }
-        user.deactivate();
+
     }
 
 

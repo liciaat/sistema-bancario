@@ -38,7 +38,7 @@ public class AuthController {
     @PostMapping("/close-acount")
     public ResponseEntity<MessageResponseDTO> deleteOwnAccount(@Valid @RequestBody DeleteOwnAccountRequestDTO dto){
         authenticationService.deleteOwnAccount(dto);
-        return ResponseEntity.ok(new MessageResponseDTO("Conta deletada com sucesso"));
+        return ResponseEntity.ok(new MessageResponseDTO("Solicitação de encerramento enviada para a gerência"));
     }
 
 
