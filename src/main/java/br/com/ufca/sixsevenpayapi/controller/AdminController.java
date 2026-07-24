@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
@@ -35,6 +37,12 @@ public class AdminController {
     public ResponseEntity<DashboardResponseDTO> getDashboard(){
         DashboardResponseDTO response = adminService.getDashboardMetrics();
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/interest-rate")
+    public ResponseEntity<MessageResponseDTO> updateInterestRate(@RequestParam BigDecimal rate){
+        adminService.updateSavingsInterestRate(rate);
+        return ResponseEntity.ok(new MessageResponseDTO("Taxa de juros atuaizada com sucesso"));
     }
 
 }

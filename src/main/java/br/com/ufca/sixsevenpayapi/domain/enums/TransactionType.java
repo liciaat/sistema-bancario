@@ -5,5 +5,6 @@ public enum TransactionType {
     WITHDRAW,
     TRANSFER,
     CREDIT,
-    INVOICE
+    INVOICE,
+    YIELD
 }

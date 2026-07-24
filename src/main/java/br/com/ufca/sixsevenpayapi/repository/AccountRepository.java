@@ -18,5 +18,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @org.springframework.data.jpa.repository.Query("SELECT SUM(a.balance) FROM Account a")
     BigDecimal getTotalBankBalance();
     long countByAccountStatus(AccountStatus accountStatus);
-
+    List<Account> findByAccountTypeAndAccountStatus(AccountType accountType, AccountStatus accountStatus);
 }

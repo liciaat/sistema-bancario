@@ -4,6 +4,7 @@ import br.com.ufca.sixsevenpayapi.application.dto.DashboardResponseDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.RegisterManagerDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Manager;
+import br.com.ufca.sixsevenpayapi.domain.entity.SystemConfig;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
 import br.com.ufca.sixsevenpayapi.repository.*;
@@ -26,13 +27,15 @@ public class AdminService {
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
     private final RequestRepository requestRepository;
+    private final SystemConfigRepository systemConfigRepository;
 
-    public AdminService(ManagerRepository managerRepository, UserRepository userRepository, AccountRepository accountRepository, CustomerRepository customerRepository, RequestRepository requestRepository) {
+    public AdminService(ManagerRepository managerRepository, SystemConfigRepository systemConfigRepository,UserRepository userRepository, AccountRepository accountRepository, CustomerRepository customerRepository, RequestRepository requestRepository) {
         this.managerRepository = managerRepository;
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.customerRepository = customerRepository;
         this.requestRepository = requestRepository;
+        this.systemConfigRepository = systemConfigRepository;
     }
 
     @Transactional
@@ -74,5 +77,19 @@ public class AdminService {
 
         return new DashboardResponseDTO(totalAccounts, totalCustomers, totalBankBalance, blockedAccounts, pendingRequests);
     }
+
+    @Transactional
+    public void updateSavingsInterestRate(BigDecimal newRate){
+        if(newRate.compareTo(BigDecimal.ZERO) < 0){
+            throw  new RuntimeException("A taxa de juros não pode ser negativa");
+        }
+        SystemConfig config = systemConfigRepository.findAll().stream().findFirst()
+                .orElse(new SystemConfig(BigDecimal.ZERO));
+
+        config.setSavingsInterestRate(newRate);
+        systemConfigRepository.save(config);
+    }
+
+
 
 }
