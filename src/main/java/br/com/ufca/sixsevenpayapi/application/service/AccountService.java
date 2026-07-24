@@ -7,12 +7,14 @@ import br.com.ufca.sixsevenpayapi.application.dto.WithdrawDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
 import br.com.ufca.sixsevenpayapi.domain.entity.Transaction;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
+import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 import br.com.ufca.sixsevenpayapi.domain.enums.TransactionType;
 import br.com.ufca.sixsevenpayapi.repository.AccountRepository;
 import br.com.ufca.sixsevenpayapi.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +23,8 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
+
+    private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("500");
 
     public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
@@ -71,9 +75,7 @@ public class AccountService {
             return this.transfer(transferDTO);
         }
 
-        if(sourceAccount.getBalance().compareTo(transferDTO.amount())< 0){
-            throw new RuntimeException("Saldo insuficiente");
-        }
+        checkAvailableLimit(sourceAccount, transferDTO.amount());
 
         sourceAccount.setBalance(sourceAccount.getBalance().subtract(transferDTO.amount()));
         accountRepository.save(sourceAccount);
@@ -134,9 +136,8 @@ public class AccountService {
             throw new RuntimeException("Senha de transação incorreta!");
         }
 
-        if(sourceAccount.getBalance().compareTo(dto.amount()) < 0){
-            throw new RuntimeException("Saldo insuficiente para transferencia");
-        }
+        checkAvailableLimit(sourceAccount, dto.amount());
+
 
         Account targetAccount = accountRepository.findByAccountNumber(dto.targetAccountNumber())
                 .orElseThrow(() -> new RuntimeException("Conta Destino não encontrada"));
@@ -170,6 +171,17 @@ public class AccountService {
             dtos.add(TransactionResponseDTO.fromEntity(transaction));
         }
         return dtos;
+    }
+
+    private void checkAvailableLimit(Account account, BigDecimal requestedAmount){
+        BigDecimal availableLimit = account.getBalance();
+
+        if(account.getAccountType() == AccountType.CHECKING){
+            availableLimit = availableLimit.add(OVERDRAFT_LIMIT);
+        }
+        if(availableLimit.compareTo(requestedAmount) < 0){
+            throw new RuntimeException("Saldo insuficiente. O valor ultrapassa o limite da conta.");
+        }
     }
 
 }
