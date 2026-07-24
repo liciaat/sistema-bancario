@@ -29,17 +29,20 @@ public class RequestService {
     private final CustomerRepository customerRepository;
     private final ManagerRepository managerRepository;
     private final CreditCardRepository creditCardRepository;
+    private final UserRepository userRepository;
 
     public RequestService(RequestRepository requestRepository,
                           AccountRepository accountRepository,
                           CustomerRepository customerRepository,
                           ManagerRepository managerRepository,
-                          CreditCardRepository creditCardRepository) {
+                          CreditCardRepository creditCardRepository,
+                          UserRepository userRepository) {
         this.requestRepository = requestRepository;
         this.accountRepository =  accountRepository;
         this.customerRepository = customerRepository;
         this.managerRepository = managerRepository;
         this.creditCardRepository = creditCardRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -90,6 +93,10 @@ public class RequestService {
 
         Manager manager = managerRepository.findById(dto.managerId())
                 .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+
+        if(!manager.isActive()){
+            throw new RuntimeException("Gerente inativo");
+        }
 
         if(!dto.managerPassword().equals(manager.getPassword())){
             throw new RuntimeException("A senha do gerente está incorreta");
@@ -143,6 +150,9 @@ public class RequestService {
                     accountRepository.save(account);
                 }
             }
+            customer.deactivate();
+            userRepository.save(customer);
+
             request.setStatus(RequestStatus.APPROVED);
             Request updatedRequest = requestRepository.save(request);
             return RequestResponseDTO.fromEntity(updatedRequest);
@@ -161,6 +171,11 @@ public class RequestService {
 
         Manager manager = managerRepository.findById(dto.managerId())
                 .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+
+
+        if(!manager.isActive()){
+            throw new RuntimeException("Gerente inativo");
+        }
 
         if(!dto.managerPassword().equals(manager.getPassword())){
             throw new RuntimeException("A senha do gerente está incorreta");

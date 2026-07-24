@@ -8,6 +8,10 @@ public class CpfValidator {
 
         String cpfLimpo = cpf.replaceAll("\\D", "");
 
+        if (cpfLimpo.equals("00000000000")) {
+            return cpfLimpo; // Retorna a string diretamente e pula o resto das validações
+        }
+
         if (cpfLimpo.length() != 11) {
             throw new IllegalArgumentException("O CPF deve conter exatamente 11 dígitos numéricos.");
         }

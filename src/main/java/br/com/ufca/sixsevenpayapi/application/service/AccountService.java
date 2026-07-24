@@ -36,6 +36,10 @@ public class AccountService {
         Account account = accountRepository.findByAccountNumber(dto.accountNumber())
                 .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
 
+        if (!account.getCustomer().isActive()) {
+            throw new RuntimeException("Operação negada: O cliente titular está inativo.");
+        }
+
         if (account.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new RuntimeException("Operação não permitida: A conta está bloqueada ou inativa.");
         }
@@ -54,6 +58,9 @@ public class AccountService {
         Account sourceAccount = accountRepository.findByAccountNumber(transferDTO.sourceAccountNumber())
                 .orElseThrow(()->new RuntimeException("Conta origem não encontrada"));
 
+        if (!sourceAccount.getCustomer().isActive()) {
+            throw new RuntimeException("Operação negada: O cliente titular está inativo.");
+        }
 
         if (sourceAccount.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new RuntimeException("Operação não permitida: A conta origem está bloqueada ou inativa.");
@@ -96,6 +103,9 @@ public class AccountService {
         Account account = accountRepository.findByAccountNumber(dto.accountNumber())
                 .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
 
+        if (!account.getCustomer().isActive()) {
+            throw new RuntimeException("Operação negada: O cliente titular está inativo.");
+        }
 
         if (account.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new RuntimeException("Operação não permitida: A conta está bloqueada ou inativa.");
@@ -128,6 +138,10 @@ public class AccountService {
         Account sourceAccount = accountRepository.findByAccountNumber(dto.sourceAccountNumber())
                 .orElseThrow(() -> new RuntimeException("Conta Origem não encontrada"));
 
+        if (!sourceAccount.getCustomer().isActive()) {
+            throw new RuntimeException("Operação negada: O cliente titular da conta origem está inativo.");
+        }
+
         if (sourceAccount.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new RuntimeException("Operação não permitida: A conta origem está bloqueada ou inativa.");
         }
@@ -141,6 +155,10 @@ public class AccountService {
 
         Account targetAccount = accountRepository.findByAccountNumber(dto.targetAccountNumber())
                 .orElseThrow(() -> new RuntimeException("Conta Destino não encontrada"));
+
+        if (!targetAccount.getCustomer().isActive()) {
+            throw new RuntimeException("Operação negada: O cliente titular da conta destino está inativo.");
+        }
 
         if (targetAccount.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new RuntimeException("Operação não permitida: A conta destino está bloqueada ou inativa.");

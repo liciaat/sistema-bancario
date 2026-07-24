@@ -39,7 +39,7 @@ public class CreditCardController {
             description = "Retorna os detalhes de uma fatura através do seu ID."
     )
     @GetMapping("/invoices/{invoiceId}")
-    public ResponseEntity<InvoiceResponseDTO> getInvoice(@RequestParam Long invoiceId){
+    public ResponseEntity<InvoiceResponseDTO> getInvoice(@PathVariable Long invoiceId){
         InvoiceResponseDTO response = creditCardService.getInvoice(invoiceId);
         return ResponseEntity.ok(response);
     }
