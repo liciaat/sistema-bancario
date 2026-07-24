@@ -1,13 +1,17 @@
 package br.com.ufca.sixsevenpayapi.application.service;
 
+import br.com.ufca.sixsevenpayapi.application.dto.DashboardResponseDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.RegisterManagerDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Manager;
-import br.com.ufca.sixsevenpayapi.repository.ManagerRepository;
-import br.com.ufca.sixsevenpayapi.repository.UserRepository;
+import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
+import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
+import br.com.ufca.sixsevenpayapi.repository.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static br.com.ufca.sixsevenpayapi.domain.utils.CpfValidator.validateAndSanitizeCpf;
@@ -19,11 +23,16 @@ public class AdminService {
 
     private final ManagerRepository managerRepository;
     private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
+    private final CustomerRepository customerRepository;
+    private final RequestRepository requestRepository;
 
-
-    public AdminService(ManagerRepository managerRepository, UserRepository userRepository) {
+    public AdminService(ManagerRepository managerRepository, UserRepository userRepository, AccountRepository accountRepository, CustomerRepository customerRepository, RequestRepository requestRepository) {
         this.managerRepository = managerRepository;
         this.userRepository = userRepository;
+        this.accountRepository = accountRepository;
+        this.customerRepository = customerRepository;
+        this.requestRepository = requestRepository;
     }
 
     @Transactional
@@ -51,6 +60,19 @@ public class AdminService {
                 .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
         manager.deactivate();
         managerRepository.save(manager);
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardResponseDTO getDashboardMetrics(){
+        long totalAccounts = accountRepository.count();
+        long totalCustomers = customerRepository.count();
+        BigDecimal totalBankBalance = accountRepository.getTotalBankBalance();
+        if(totalBankBalance == null) totalBankBalance = BigDecimal.ZERO;
+
+        long blockedAccounts = accountRepository.countByAccountStatus(AccountStatus.BLOCKED);
+        long pendingRequests = requestRepository.countByStatus(RequestStatus.PENDING);
+
+        return new DashboardResponseDTO(totalAccounts, totalCustomers, totalBankBalance, blockedAccounts, pendingRequests);
     }
 
 }

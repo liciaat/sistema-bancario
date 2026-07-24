@@ -1,5 +1,6 @@
 package br.com.ufca.sixsevenpayapi.controller;
 
+import br.com.ufca.sixsevenpayapi.application.dto.DashboardResponseDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.MessageResponseDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.RegisterManagerDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
@@ -28,6 +29,12 @@ public class AdminController {
     public ResponseEntity<MessageResponseDTO> removeManager(@PathVariable Long id){
         adminService.removeManager(id);
         return ResponseEntity.ok(new MessageResponseDTO("Conta de gerente desativada"));
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<DashboardResponseDTO> getDashboard(){
+        DashboardResponseDTO response = adminService.getDashboardMetrics();
+        return ResponseEntity.ok(response);
     }
 
 }
