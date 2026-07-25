@@ -2,6 +2,7 @@ package br.com.ufca.sixsevenpayapi.application.service;
 
 import br.com.ufca.sixsevenpayapi.application.dto.DashboardResponseDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.RegisterManagerDTO;
+import br.com.ufca.sixsevenpayapi.application.dto.UpdateManagerDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Manager;
 import br.com.ufca.sixsevenpayapi.domain.entity.SystemConfig;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 import static br.com.ufca.sixsevenpayapi.domain.utils.CpfValidator.validateAndSanitizeCpf;
 import static br.com.ufca.sixsevenpayapi.domain.utils.EmailValidator.validateAndSanitizeEmail;
@@ -42,12 +44,12 @@ public class AdminService {
     public UserResponseDTO registerManager(RegisterManagerDTO dto){
         String cleanCpf = validateAndSanitizeCpf(dto.cpf());
         if(userRepository.existsByCpf(cleanCpf)){
-            throw new RuntimeException("Usuário já cadastrado com este CPF");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Usuário já cadastrado com este CPF");
         }
 
         String cleanEmail = validateAndSanitizeEmail(dto.email());
         if(userRepository.existsByEmail(cleanEmail)){
-            throw new RuntimeException("Email já cadastrado");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Email já cadastrado");
         }
 
         String cleanPhone = validateAndSanitizePhone(dto.phone());
@@ -60,7 +62,7 @@ public class AdminService {
     @Transactional
     public void removeManager(Long managerId){
         Manager manager = managerRepository.findById(managerId)
-                .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+                        .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Gerente não encontrado"));
         manager.deactivate();
         managerRepository.save(manager);
     }
@@ -81,7 +83,7 @@ public class AdminService {
     @Transactional
     public void updateSavingsInterestRate(BigDecimal newRate){
         if(newRate.compareTo(BigDecimal.ZERO) < 0){
-            throw  new RuntimeException("A taxa de juros não pode ser negativa");
+            throw  new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("A taxa de juros não pode ser negativa");
         }
         SystemConfig config = systemConfigRepository.findAll().stream().findFirst()
                 .orElse(new SystemConfig(BigDecimal.ZERO));
@@ -90,6 +92,42 @@ public class AdminService {
         systemConfigRepository.save(config);
     }
 
+    @Transactional(readOnly = true)
+    public UserResponseDTO getManagerById(Long managerId){
+        Manager manager = managerRepository.findById(managerId)
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Gerente não encontrado"));
+        return UserResponseDTO.fromEntity(manager);
+    }
 
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> getAllManagers(){
+        return managerRepository.findAll().stream().map(UserResponseDTO::fromEntity).toList();
+    }
+
+    @Transactional
+    public UserResponseDTO updateManager(Long managerId, UpdateManagerDTO dto){
+        Manager manager = managerRepository.findById(managerId)
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Gerente não encontrado"));
+
+        if(dto.name() != null && !dto.name().isBlank()){
+            manager.changeFullName(dto.name());
+        }
+
+        if(dto.email() != null && !dto.email().isBlank()){
+            String cleanEmail = validateAndSanitizeEmail(dto.email());
+            if(userRepository.existsByEmail(cleanEmail) && !cleanEmail.equals(manager.getEmail())){
+                throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Email já cadastrado");
+            }
+            manager.changeEmail(cleanEmail);
+        }
+
+        if(dto.phone() != null && !dto.phone().isBlank()){
+            String cleanPhone = validateAndSanitizePhone(dto.phone());
+            manager.changePhone(cleanPhone);
+        }
+
+        Manager saved = managerRepository.save(manager);
+        return UserResponseDTO.fromEntity(saved);
+    }
 
 }

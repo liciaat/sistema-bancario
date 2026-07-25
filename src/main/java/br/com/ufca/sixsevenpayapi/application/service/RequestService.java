@@ -49,14 +49,14 @@ public class RequestService {
     public RequestResponseDTO requestSavingsAccount(SavingsAccountRequestDTO dto){
 
         Customer customer = customerRepository.findById(dto.customerId())
-                .orElseThrow(() -> new RuntimeException("Cliente com esse Id não existe"));
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Cliente com esse Id não existe"));
 
         if(accountRepository.existsByCustomerIdAndAccountType(dto.customerId(), AccountType.SAVINGS)){
-            throw new RuntimeException("O cliente já tem uma conta poupança");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("O cliente já tem uma conta poupança");
         }
 
         if(requestRepository.existsByCustomerIdAndTypeAndStatus(dto.customerId(), RequestType.ACCOUNT, RequestStatus.PENDING)){
-            throw new RuntimeException("O cliente já tem uma solicitação de conta pouopança pendente");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("O cliente já tem uma solicitação de conta pouopança pendente");
         }
 
         AccountRequest request = new AccountRequest(customer, AccountType.SAVINGS);
@@ -69,16 +69,16 @@ public class RequestService {
     public RequestResponseDTO requestCredit(CreditRequestDTO dto){
 
         Customer customer = customerRepository.findById(dto.customerId())
-                .orElseThrow(() -> new RuntimeException("Cliente com esse Id não existe"));
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Cliente com esse Id não existe"));
 
         if(requestRepository.existsByCustomerIdAndTypeAndStatus(dto.customerId(), RequestType.CREDIT, RequestStatus.PENDING)){
-            throw new RuntimeException("O cliente já tem uma solicitação de crédito");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("O cliente já tem uma solicitação de crédito");
         }
 
         if(creditCardRepository.existsByCustomerId(customer.getId())){
             Optional<CreditCard> creditCard = creditCardRepository.findByCustomerId(customer.getId());
             if(dto.requestedLimit().compareTo(creditCard.get().getCurrentSpending()) < 0){
-                throw new RuntimeException("Solicitação de crédito menor que a fatura atual");
+                throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Solicitação de crédito menor que a fatura atual");
             }
         }
 
@@ -89,24 +89,24 @@ public class RequestService {
     }
 
     @Transactional
-    public RequestResponseDTO approveRequest(ProcessRequestDTO dto){
+    public RequestResponseDTO approveRequest(Long requestId, ProcessRequestDTO dto){
 
         Manager manager = managerRepository.findById(dto.managerId())
-                .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Gerente não encontrado"));
 
         if(!manager.isActive()){
-            throw new RuntimeException("Gerente inativo");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Gerente inativo");
         }
 
         if(!dto.managerPassword().equals(manager.getPassword())){
-            throw new RuntimeException("A senha do gerente está incorreta");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("A senha do gerente está incorreta");
         }
 
-        Request request = requestRepository.findById(dto.requestId())
-                .orElseThrow(() -> new RuntimeException("Id da solicitação inválido"));
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Id da solicitação inválido"));
 
         if (request.getStatus() != RequestStatus.PENDING) {
-            throw new RuntimeException("Apenas solicitações com status PENDENTE podem ser aprovadas");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Apenas solicitações com status PENDENTE podem ser aprovadas");
         }
         if(request instanceof AccountRequest){
             String accountNumber = generateAccountNumber();
@@ -122,7 +122,7 @@ public class RequestService {
             if(existingCard.isPresent()){
                 CreditCard creditCard = existingCard.get();
                 if(creditReq.getRequestedLimit().compareTo(creditCard.getCurrentSpending()) < 0){
-                    throw new RuntimeException("Solicitação de crédito menor que a fatura atual");
+                    throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Solicitação de crédito menor que a fatura atual");
                 }
                 creditCard.setCreditLimit(creditReq.getRequestedLimit());
                 creditCardRepository.save(creditCard);
@@ -139,12 +139,12 @@ public class RequestService {
 
             if (customer.getAccounts() != null && !customer.getAccounts().isEmpty()) {
                 if(customer.getCreditCard() != null && customer.getCreditCard().getCurrentSpending().compareTo(BigDecimal.ZERO) > 0){
-                    throw new RuntimeException("Não é possível excluir o perfil: ainda existe divida no cartão de crédito");
+                    throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Não é possível excluir o perfil: ainda existe divida no cartão de crédito");
                 }
 
                 for (Account account : customer.getAccounts()) {
                     if (account.getBalance() != null && account.getBalance().compareTo(BigDecimal.ZERO) != 0) {
-                        throw new RuntimeException("Não é possível excluir o perfil: ainda existe saldo na conta " + account.getAccountNumber());
+                        throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Não é possível excluir o perfil: ainda existe saldo na conta " + account.getAccountNumber());
                     }
                     account.setAccountStatus(AccountStatus.CLOSED);
                     accountRepository.save(account);
@@ -167,25 +167,25 @@ public class RequestService {
     }
 
     @Transactional
-    public RequestResponseDTO rejectRequest(ProcessRequestDTO dto){
+    public RequestResponseDTO rejectRequest(Long requestId, ProcessRequestDTO dto){
 
         Manager manager = managerRepository.findById(dto.managerId())
-                .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Gerente não encontrado"));
 
 
         if(!manager.isActive()){
-            throw new RuntimeException("Gerente inativo");
+        throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Gerente inativo");
         }
 
         if(!dto.managerPassword().equals(manager.getPassword())){
-            throw new RuntimeException("A senha do gerente está incorreta");
+        throw new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("A senha do gerente está incorreta");
         }
 
-        Request request = requestRepository.findById(dto.requestId())
-                .orElseThrow(() -> new RuntimeException("Id da solicitação inválido"));
+        Request request = requestRepository.findById(requestId)
+            .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Id da solicitação inválido"));
 
         if (request.getStatus() != RequestStatus.PENDING) {
-            throw new RuntimeException("Apenas solicitações com status PENDENTE podem ser negadas");
+        throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Apenas solicitações com status PENDENTE podem ser negadas");
         }
 
         request.setStatus(RequestStatus.REJECTED);

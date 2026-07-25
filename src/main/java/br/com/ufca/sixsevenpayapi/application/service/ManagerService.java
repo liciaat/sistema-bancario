@@ -6,12 +6,14 @@ import br.com.ufca.sixsevenpayapi.domain.entity.Account;
 import br.com.ufca.sixsevenpayapi.domain.entity.AccountRequest;
 import br.com.ufca.sixsevenpayapi.domain.entity.Request;
 import br.com.ufca.sixsevenpayapi.domain.entity.Transaction;
+import br.com.ufca.sixsevenpayapi.domain.entity.Manager;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
 import br.com.ufca.sixsevenpayapi.repository.AccountRepository;
 import br.com.ufca.sixsevenpayapi.repository.AccountRequestRepository;
 import br.com.ufca.sixsevenpayapi.repository.RequestRepository;
 import br.com.ufca.sixsevenpayapi.repository.TransactionRepository;
+import br.com.ufca.sixsevenpayapi.repository.ManagerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +27,13 @@ public class ManagerService {
     private final RequestRepository requestRepository;
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
+    private final ManagerRepository managerRepository;
 
-    public ManagerService(RequestRepository requestRepository, AccountRepository accountRepository, TransactionRepository transactionRepository) {
+    public ManagerService(RequestRepository requestRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, ManagerRepository managerRepository) {
         this.requestRepository = requestRepository;
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
+        this.managerRepository = managerRepository;
     }
 
     @Transactional
@@ -43,12 +47,12 @@ public class ManagerService {
     }
 
     @Transactional
-    public AccountResponseDTO toggleAccountStatus(ToggleAccountBlockDTO dto){
-        Account account = accountRepository.findByAccountNumber(dto.accountId())
-                .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
+    public AccountResponseDTO toggleAccountStatus(Long accountId){
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Conta não encontrada"));
 
         if(account.getAccountStatus() == AccountStatus.CLOSED){
-            throw new RuntimeException("Não é possível alterar o status de uma conta fechada");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Não é possível alterar o status de uma conta fechada");
         }
 
         if(account.getAccountStatus() == AccountStatus.BLOCKED){
@@ -80,6 +84,13 @@ public class ManagerService {
             responseDTOs.add(AccountResponseDTO.fromEntity(negativeAccount));
         }
         return responseDTOs;
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponseDTO getManager(Long managerId){
+        Manager manager = managerRepository.findById(managerId)
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Gerente não encontrado"));
+        return UserResponseDTO.fromEntity(manager);
     }
 
 

@@ -7,9 +7,7 @@ import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 
-public record WithdrawDTO(@NotBlank(message = "O número da conta é obrigatório")
-                          String accountNumber,
-                          @Valid @NotBlank(message = "A senha de transação é obrigatória")
+public record WithdrawDTO(@Valid @NotBlank(message = "A senha de transação é obrigatória")
                           String transactionPassword,
                           @NotNull(message = "O valor é obrigatório")
                           @Positive(message = "O valor do saque deve ser maior que zero")

@@ -40,23 +40,23 @@ public class CreditCardService {
     @Transactional
     public PurchaseResponseDTO processPurchase(PurchaseDTO dto){
         CreditCard creditCard = creditCardRepository.findByCardNumber(dto.cardNumber())
-                .orElseThrow(() -> new RuntimeException("Cartão de crédito não encontrado"));
+                        .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Cartão de crédito não encontrado"));
 
         if(!creditCard.getCustomer().isActive()){
-            throw new RuntimeException("Cliente inativo");
+                    throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Cliente inativo");
         }
 
         if(!dto.transactionPassword().equals(creditCard.getCustomer().getTransactionPassword())){
-            throw  new RuntimeException("Senha de transação incorreta");
+                    throw  new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("Senha de transação incorreta");
         }
 
         if(!dto.cvv().equals(creditCard.getCvv())){
-            throw new RuntimeException("CVV inválido");
+                    throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("CVV inválido");
         }
 
         BigDecimal avaibleLimit = creditCard.getCreditLimit().subtract(creditCard.getCurrentSpending());
         if(dto.amount().compareTo(avaibleLimit) > 0){
-            throw new RuntimeException("Limite insuficiente para compra");
+                    throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Limite insuficiente para compra");
         }
 
         Optional<Invoice> existingInvoice = invoiceRepository.findByCreditCardIdAndStatus(creditCard.getId(), InvoiceStatus.PENDING);
@@ -83,32 +83,32 @@ public class CreditCardService {
     @Transactional(readOnly = true)
     public InvoiceResponseDTO getInvoice(Long invoiceId){
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Fatura não encontrada"));
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Fatura não encontrada"));
 
         return InvoiceResponseDTO.fromEntity(invoice);
     }
 
     @Transactional
-    public InvoiceResponseDTO payInvoice(PayInvoiceDTO dto){
-        Invoice invoice = invoiceRepository.findById(dto.invoiceId())
-                .orElseThrow(() -> new RuntimeException("Fatura não encontrada"));
+    public InvoiceResponseDTO payInvoice(Long invoiceId, PayInvoiceDTO dto){
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Fatura não encontrada"));
         if(invoice.getStatus().equals(InvoiceStatus.PAID)){
-            throw new RuntimeException("Esta fatura já está paga");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Esta fatura já está paga");
         }
 
         Account account = accountRepository.findByAccountNumber(dto.accountNumber())
-                .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Conta não encontrada"));
 
         if(!account.getCustomer().equals(invoice.getCreditCard().getCustomer())){
-            throw new RuntimeException("A conta informada não pertence ao titular do cartão");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.ForbiddenException("A conta informada não pertence ao titular do cartão");
         }
 
         if(account.getAccountStatus() != AccountStatus.ACTIVE){
-            throw new RuntimeException("A conta está bloqueada");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("A conta está bloqueada");
         }
 
         if(!dto.transactionPassword().equals(account.getCustomer().getTransactionPassword())){
-            throw new RuntimeException("Senha de transação incorreta");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("Senha de transação incorreta");
         }
 
         BigDecimal availableLimit = account.getBalance();
@@ -117,7 +117,7 @@ public class CreditCardService {
         }
 
         if(availableLimit.compareTo(invoice.getTotalAmount()) < 0){
-            throw new RuntimeException("Saldo insuficiente para pagar a fatura");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Saldo insuficiente para pagar a fatura");
         }
 
         account.setBalance(account.getBalance().subtract(invoice.getTotalAmount()));
@@ -139,14 +139,14 @@ public class CreditCardService {
     @Transactional(readOnly = true)
     public CreditCardResponseDTO getCreditCardByCustomer(Long customerId){
         CreditCard creditCard = creditCardRepository.findByCustomerId(customerId)
-                .orElseThrow(() -> new RuntimeException("Cliente não possui cartão de crédito"));
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Cliente não possui cartão de crédito"));
         return CreditCardResponseDTO.fromEntity(creditCard);
     }
 
     @Transactional(readOnly = true)
     public List<InvoiceResponseDTO> getCustomerInvoices(Long customerId){
         CreditCard creditCard = creditCardRepository.findByCustomerId(customerId)
-                .orElseThrow(() -> new RuntimeException("Cliente não possui cartão de crédito"));
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Cliente não possui cartão de crédito"));
 
         List<Invoice> invoices = creditCard.getInvoices();
         List<InvoiceResponseDTO> dtos = new ArrayList<>();

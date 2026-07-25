@@ -42,13 +42,13 @@ public class AuthenticationService {
 
 
         if(user == null){
-            throw new RuntimeException("Usuário não existe");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Usuário não existe");
         }
         if(!user.isActive()){
-            throw new RuntimeException("Usuário não está  ativo");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Usuário não está  ativo");
         }
         if(!dto.password().equals(user.getPassword())){
-            throw new RuntimeException("Senha incorreta");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("Senha incorreta");
         }
         return UserResponseDTO.fromEntity(user);
     }
@@ -57,23 +57,23 @@ public class AuthenticationService {
     public UserResponseDTO register(RegisterRequestDTO dto) {
         String cleanCpf = CpfValidator.validateAndSanitizeCpf(dto.cpf());
         if(userRepository.existsByCpf(cleanCpf)){
-            throw new RuntimeException("Usuário já cadastrado");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Usuário já cadastrado");
         }
         String cleanEmail = EmailValidator.validateAndSanitizeEmail(dto.email());
         if(userRepository.existsByEmail(cleanEmail)){
-            throw new RuntimeException("Email já cadastrado");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Email já cadastrado");
         }
         String cleanPhone = PhoneValidator.validateAndSanitizePhone(dto.phoneNumber());
         if(userRepository.existsByPhone(cleanPhone)){
-            throw new RuntimeException("Telefone já cadastrado");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Telefone já cadastrado");
         }
 
         if(!dto.password().equals(dto.confirmPassword())){
-            throw new RuntimeException("Senhas não coincidem");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Senhas não coincidem");
         }
 
         if(!dto.confirmTransactionPassword().equals(dto.transactionPassword())){
-            throw new RuntimeException("Senhas de transação não coincidem");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Senhas de transação não coincidem");
 
         }
 
@@ -97,13 +97,13 @@ public class AuthenticationService {
         String clearCpf = CpfValidator.validateAndSanitizeCpf(dto.cpf());
         User user = userRepository.findByCpf(clearCpf);
         if(user == null){
-            throw new RuntimeException("Usuário não existe");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Usuário não existe");
         }
         if(!dto.password().equals(user.getPassword())){
-            throw new RuntimeException("Senha incorreta");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("Senha incorreta");
         }
         if(dto.password().equals(dto.newPassword())){
-            throw new RuntimeException("Senha igual a anterior");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Senha igual a anterior");
         }
         user.changePassword(dto.newPassword());
     }
@@ -111,15 +111,15 @@ public class AuthenticationService {
     @Transactional
     public void deleteOwnAccount(DeleteOwnAccountRequestDTO dto){
         User user = userRepository.findById(dto.accountId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Usuário não encontrado"));
 
         if(!dto.password().equals(user.getPassword())){
-            throw new RuntimeException("Senha incorreta");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("Senha incorreta");
         }
 
         if (user instanceof Customer customer) {
             if(requestRepository.existsByCustomerIdAndTypeAndStatus(customer.getId(), RequestType.CLOSURE, RequestStatus.PENDING)){
-                throw new RuntimeException("Já existe uma solicitação de encerramento pendente para esta conta");
+                throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Já existe uma solicitação de encerramento pendente para esta conta");
             }
 
             ClosureRequest request = new ClosureRequest(customer);
@@ -128,7 +128,7 @@ public class AuthenticationService {
             user.deactivate();
             userRepository.save(user);
         }else{
-            throw new RuntimeException("Admin não pode solicitar a exclusão da própria conta");
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Admin não pode solicitar a exclusão da própria conta");
         }
 
     }
