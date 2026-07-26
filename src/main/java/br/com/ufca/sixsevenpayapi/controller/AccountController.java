@@ -1,18 +1,13 @@
 package br.com.ufca.sixsevenpayapi.controller;
 
 
-import br.com.ufca.sixsevenpayapi.application.dto.DepositDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.TransactionResponseDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.TransferDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.WithdrawDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.AccountResponseDTO;
+import br.com.ufca.sixsevenpayapi.application.dto.*;
 import br.com.ufca.sixsevenpayapi.application.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import br.com.ufca.sixsevenpayapi.application.dto.StandardErrorDTO;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -100,5 +95,24 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-
+    @Operation(
+            summary = "Consultar saldo",
+            description = "Retorna o saldo atual da conta."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Saldo retornado com sucesso"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Conta não encontrada",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = StandardErrorDTO.class)
+                    )
+            )
+    })
+    @GetMapping("/{accountId}/balance")
+    public ResponseEntity<BalanceResponseDTO> getBalance(@PathVariable Long accountId) {
+        BalanceResponseDTO response = accountService.getBalance(accountId);
+        return ResponseEntity.ok(response);
+    }
 }

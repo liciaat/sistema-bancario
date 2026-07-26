@@ -1,9 +1,6 @@
 package br.com.ufca.sixsevenpayapi.application.service;
 
-import br.com.ufca.sixsevenpayapi.application.dto.DepositDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.TransactionResponseDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.TransferDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.WithdrawDTO;
+import br.com.ufca.sixsevenpayapi.application.dto.*;
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
 import br.com.ufca.sixsevenpayapi.domain.entity.Transaction;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
@@ -14,7 +11,6 @@ import br.com.ufca.sixsevenpayapi.repository.TransactionRepository;
 import br.com.ufca.sixsevenpayapi.repository.CustomerRepository;
 import br.com.ufca.sixsevenpayapi.repository.UserRepository;
 import br.com.ufca.sixsevenpayapi.domain.utils.CpfValidator;
-import br.com.ufca.sixsevenpayapi.application.dto.AccountResponseDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.Customer;
 import br.com.ufca.sixsevenpayapi.domain.entity.User;
 import org.springframework.stereotype.Service;
@@ -207,6 +203,19 @@ public class AccountService {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Conta não encontrada"));
         return AccountResponseDTO.fromEntity(account);
+    }
+
+    @Transactional(readOnly = true)
+    public BalanceResponseDTO getBalance(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() ->
+                        new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Conta não encontrada"));
+
+        return new BalanceResponseDTO(
+                account.getId(),
+                account.getAccountNumber(),
+                account.getBalance()
+        );
     }
 
     private void checkAvailableLimit(Account account, BigDecimal requestedAmount){
