@@ -2,18 +2,10 @@ package br.com.ufca.sixsevenpayapi.application.service;
 
 
 import br.com.ufca.sixsevenpayapi.application.dto.*;
-import br.com.ufca.sixsevenpayapi.domain.entity.Account;
-import br.com.ufca.sixsevenpayapi.domain.entity.AccountRequest;
-import br.com.ufca.sixsevenpayapi.domain.entity.Request;
-import br.com.ufca.sixsevenpayapi.domain.entity.Transaction;
-import br.com.ufca.sixsevenpayapi.domain.entity.Manager;
+import br.com.ufca.sixsevenpayapi.domain.entity.*;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
-import br.com.ufca.sixsevenpayapi.repository.AccountRepository;
-import br.com.ufca.sixsevenpayapi.repository.AccountRequestRepository;
-import br.com.ufca.sixsevenpayapi.repository.RequestRepository;
-import br.com.ufca.sixsevenpayapi.repository.TransactionRepository;
-import br.com.ufca.sixsevenpayapi.repository.ManagerRepository;
+import br.com.ufca.sixsevenpayapi.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +20,14 @@ public class ManagerService {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final ManagerRepository managerRepository;
+    private final CustomerRepository customerRepository;
 
-    public ManagerService(RequestRepository requestRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, ManagerRepository managerRepository) {
+    public ManagerService(RequestRepository requestRepository, CustomerRepository customerRepository,AccountRepository accountRepository, TransactionRepository transactionRepository, ManagerRepository managerRepository) {
         this.requestRepository = requestRepository;
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
         this.managerRepository = managerRepository;
+        this.customerRepository = customerRepository;
     }
 
     @Transactional
@@ -91,6 +85,16 @@ public class ManagerService {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Gerente não encontrado"));
         return UserResponseDTO.fromEntity(manager);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CustomerResponseDTO> getCustomers() {
+        List<Customer> customers = customerRepository.findAll();
+        List<CustomerResponseDTO> responseDTOs = new ArrayList<>();
+        for (Customer customer : customers) {
+            responseDTOs.add(CustomerResponseDTO.fromEntity(customer));
+        }
+        return responseDTOs;
     }
 
 

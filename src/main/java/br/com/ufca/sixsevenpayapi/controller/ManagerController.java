@@ -1,20 +1,15 @@
 package br.com.ufca.sixsevenpayapi.controller;
 
 
-import br.com.ufca.sixsevenpayapi.application.dto.AccountResponseDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.RequestResponseDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.ToggleAccountBlockDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.TransactionResponseDTO;
-import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
+import br.com.ufca.sixsevenpayapi.application.dto.*;
 import br.com.ufca.sixsevenpayapi.application.service.ManagerService;
+import br.com.ufca.sixsevenpayapi.domain.entity.Customer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import br.com.ufca.sixsevenpayapi.application.dto.StandardErrorDTO;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -105,6 +100,23 @@ public class ManagerController {
     })
     public ResponseEntity<List<AccountResponseDTO>> getNegativeAccounts() {
         List<AccountResponseDTO> response =  managerService.getNegativeAccounts();
+        return ResponseEntity.ok(response);
+    }
+
+
+
+    @Operation(
+            summary = "Relatório de clientes",
+            description = "Retorna uma lista com os dados de todos os clientes cadastados no banco."
+    )
+    @GetMapping("/reports/customers")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista retornada"),
+            @ApiResponse(responseCode = "401", description = "Não autorizado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StandardErrorDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StandardErrorDTO.class)))
+    })
+    public ResponseEntity<List<CustomerResponseDTO>> getAllCustomers() {
+        List<CustomerResponseDTO> response = managerService.getCustomers();
         return ResponseEntity.ok(response);
     }
 
