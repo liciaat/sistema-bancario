@@ -8,34 +8,27 @@ import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 import br.com.ufca.sixsevenpayapi.domain.enums.TransactionType;
 import br.com.ufca.sixsevenpayapi.repository.AccountRepository;
 import br.com.ufca.sixsevenpayapi.repository.TransactionRepository;
-import br.com.ufca.sixsevenpayapi.repository.CustomerRepository;
-import br.com.ufca.sixsevenpayapi.repository.UserRepository;
-import br.com.ufca.sixsevenpayapi.domain.utils.CpfValidator;
-import br.com.ufca.sixsevenpayapi.domain.entity.Customer;
-import br.com.ufca.sixsevenpayapi.domain.entity.User;
+
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class AccountService {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
-    private final CustomerRepository customerRepository;
-    private final UserRepository userRepository;
 
     private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("500");
 
-    public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository, CustomerRepository customerRepository, UserRepository userRepository) {
+    public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
-        this.customerRepository = customerRepository;
-        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -77,7 +70,7 @@ public class AccountService {
             throw new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("Senha de transação incorreta!");
         }
 
-        Account targetAccount = accountRepository.findById(transferDTO.targetAccountId())
+        Account targetAccount = accountRepository.findByAccountNumber(transferDTO.targetAccountNumber())
                 .orElseThrow(()->new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Conta destino não encontrada"));
 
 
@@ -85,24 +78,10 @@ public class AccountService {
             throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Operação não permitida: A conta destino está bloqueada ou inativa.");
         }
 
-        if(targetAccount.getCustomer().equals(sourceAccount.getCustomer())){
-            return this.transfer(sourceAccountId, transferDTO);
+        if (!targetAccount.getCustomer().getId().equals(sourceAccount.getCustomer().getId())) {
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("A conta destino deve pertencer ao mesmo titular");
         }
-
-        checkAvailableLimit(sourceAccount, transferDTO.amount());
-
-        sourceAccount.setBalance(sourceAccount.getBalance().subtract(transferDTO.amount()));
-        accountRepository.save(sourceAccount);
-        targetAccount.setBalance(targetAccount.getBalance().add(transferDTO.amount()));
-        accountRepository.save(targetAccount);
-
-        Transaction sourceTransaction = new Transaction(sourceAccount, transferDTO.amount().negate(), TransactionType.TRANSFER);
-        transactionRepository.save(sourceTransaction);
-
-        Transaction targetTransaction = new Transaction(targetAccount, transferDTO.amount(), TransactionType.TRANSFER);
-        transactionRepository.save(targetTransaction);
-
-        return TransactionResponseDTO.fromEntity(sourceTransaction);
+        return this.transfer(sourceAccountId, transferDTO);
     }
 
     @Transactional
@@ -138,12 +117,13 @@ public class AccountService {
 
     @Transactional
     public TransactionResponseDTO transfer(Long sourceAccountId, TransferDTO dto){
-        if(dto.targetAccountId().equals(sourceAccountId)){
+        Account sourceAccount = accountRepository.findById(sourceAccountId)
+                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Conta Origem não encontrada"));
+
+        if(dto.targetAccountNumber().equals(sourceAccount.getAccountNumber())){
             throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("A conta de origem não pode ser igual a conta destino");
         }
 
-        Account sourceAccount = accountRepository.findById(sourceAccountId)
-                .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Conta Origem não encontrada"));
 
         if (!sourceAccount.getCustomer().isActive()) {
             throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Operação negada: O cliente titular da conta origem está inativo.");
@@ -160,7 +140,7 @@ public class AccountService {
         checkAvailableLimit(sourceAccount, dto.amount());
 
 
-        Account targetAccount = accountRepository.findById(dto.targetAccountId())
+        Account targetAccount = accountRepository.findByAccountNumber(dto.targetAccountNumber())
                 .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Conta Destino não encontrada"));
 
         if (!targetAccount.getCustomer().isActive()) {

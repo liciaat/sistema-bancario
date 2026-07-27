@@ -70,9 +70,26 @@ public class AccountController {
     })
     @PostMapping("/{sourceAccountId}/transfer")
     public ResponseEntity<TransactionResponseDTO> transfer(@PathVariable Long sourceAccountId, @Valid @RequestBody TransferDTO dto){
-        TransactionResponseDTO response =  accountService.transfer(sourceAccountId, dto);
+        TransactionResponseDTO response =  accountService.transferBetweenOwnAccount(sourceAccountId, dto);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(
+            summary = "Realiza uma transferência para sua outra conta",
+            description = "Transfere dinheiro entre duas contas de uma mesma pessoa."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Transferência realizada"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StandardErrorDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Conta não encontrada", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StandardErrorDTO.class)))
+    })
+    @PostMapping("/{sourceAccountId}/transferBetweenOwnAccount")
+    public ResponseEntity<TransactionResponseDTO> transferBetweenOwnAccount(@PathVariable Long sourceAccountId, @Valid @RequestBody TransferDTO dto){
+        TransactionResponseDTO response =  accountService.transferBetweenOwnAccount(sourceAccountId, dto);
+        return ResponseEntity.ok(response);
+    }
+
+
 
     @Operation(
             summary = "Consulta o histórico",

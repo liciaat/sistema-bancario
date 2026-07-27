@@ -1,7 +1,7 @@
 package br.com.ufca.sixsevenpayapi.application.dto;
 
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
-import br.com.ufca.sixsevenpayapi.domain.entity.CheckingAccount;
+import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 
 import java.math.BigDecimal;
@@ -12,7 +12,8 @@ public record AccountResponseDTO(
         BigDecimal balance,
         boolean active,
         AccountType accountType,
-        String name
+        String name,
+        AccountStatus status
 ) {
     public static AccountResponseDTO fromEntity(Account account) {
 
@@ -22,7 +23,8 @@ public record AccountResponseDTO(
                 account.getBalance(),
                 account.getCustomer().isActive(),
                 account.getAccountType(),
-                account.getCustomer().getName()
+                account.getCustomer().getName(),
+                account.getAccountStatus()
         );
 
     }

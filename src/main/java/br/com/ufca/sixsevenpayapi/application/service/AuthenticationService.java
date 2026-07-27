@@ -6,7 +6,6 @@ import br.com.ufca.sixsevenpayapi.application.dto.UpdatePasswordDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.UserResponseDTO;
 import br.com.ufca.sixsevenpayapi.application.dto.DeleteOwnAccountRequestDTO;
 import br.com.ufca.sixsevenpayapi.domain.entity.*;
-import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestType;
 import br.com.ufca.sixsevenpayapi.domain.utils.EmailValidator;
@@ -18,8 +17,6 @@ import org.springframework.stereotype.Service;
 import br.com.ufca.sixsevenpayapi.domain.utils.CpfValidator;
 import org.springframework.transaction.annotation.Transactional;
 import static br.com.ufca.sixsevenpayapi.domain.utils.GenerateNumber.generateAccountNumber;
-
-import java.math.BigDecimal;
 
 
 @Service
@@ -110,7 +107,7 @@ public class AuthenticationService {
 
     @Transactional
     public void deleteOwnAccount(DeleteOwnAccountRequestDTO dto){
-        User user = userRepository.findById(dto.accountId())
+        User user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Usuário não encontrado"));
 
         if(!dto.password().equals(user.getPassword())){

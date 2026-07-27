@@ -29,7 +29,7 @@ import jakarta.validation.Valid;
 )
 public class AdminController {
 
-    private AdminService adminService;
+    private final AdminService adminService;
 
     public AdminController(AdminService adminService) {
         this.adminService = adminService;
@@ -121,6 +121,11 @@ public class AdminController {
     public ResponseEntity<List<UserResponseDTO>> getAllManagers(){
         List<UserResponseDTO> response = adminService.getAllManagers();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/managers/inactive")
+    public ResponseEntity<List<UserResponseDTO>> getInactiveManagers(){
+        return ResponseEntity.ok(adminService.getInactiveManagers());
     }
 
     @Operation(summary = "Atualizar gerente", description = "Atualiza campos flexíveis de um gerente (nome, email, telefone)")

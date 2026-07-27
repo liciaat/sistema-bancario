@@ -9,7 +9,6 @@ import br.com.ufca.sixsevenpayapi.domain.entity.SystemConfig;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.RequestStatus;
 import br.com.ufca.sixsevenpayapi.repository.*;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,11 +42,24 @@ public class AdminService {
     @Transactional
     public UserResponseDTO registerManager(RegisterManagerDTO dto){
         String cleanCpf = validateAndSanitizeCpf(dto.cpf());
-        if(userRepository.existsByCpf(cleanCpf)){
-            throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Usuário já cadastrado com este CPF");
+        String cleanEmail = validateAndSanitizeEmail(dto.email());
+        Manager existingManager = managerRepository.findByCpf(cleanCpf).orElse(null);
+
+        if (existingManager != null && !existingManager.isActive()) {
+            if (userRepository.existsByEmail(cleanEmail) && !cleanEmail.equals(existingManager.getEmail())) {
+                throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Email já cadastrado");
+            }
+            existingManager.changeFullName(dto.name());
+            existingManager.changeEmail(cleanEmail);
+            existingManager.changePhone(validateAndSanitizePhone(dto.phone()));
+            existingManager.changePassword(dto.password());
+            existingManager.activate();
+            return UserResponseDTO.fromEntity(managerRepository.save(existingManager));
         }
 
-        String cleanEmail = validateAndSanitizeEmail(dto.email());
+        if(existingManager != null || userRepository.existsByCpf(cleanCpf)){
+            throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Usuário já cadastrado com este CPF");
+        }
         if(userRepository.existsByEmail(cleanEmail)){
             throw new br.com.ufca.sixsevenpayapi.common.exception.ConflictException("Email já cadastrado");
         }
@@ -101,7 +113,12 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public List<UserResponseDTO> getAllManagers(){
-        return managerRepository.findAll().stream().map(UserResponseDTO::fromEntity).toList();
+        return managerRepository.findByActiveTrue().stream().map(UserResponseDTO::fromEntity).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> getInactiveManagers(){
+        return managerRepository.findByActiveFalse().stream().map(UserResponseDTO::fromEntity).toList();
     }
 
     @Transactional
