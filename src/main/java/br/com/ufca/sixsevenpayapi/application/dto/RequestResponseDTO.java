@@ -2,7 +2,6 @@ package br.com.ufca.sixsevenpayapi.application.dto;
 
 import br.com.ufca.sixsevenpayapi.domain.entity.AccountRequest;
 import br.com.ufca.sixsevenpayapi.domain.entity.CreditRequest;
-import br.com.ufca.sixsevenpayapi.domain.entity.CreditRequest;
 import br.com.ufca.sixsevenpayapi.domain.entity.Request;
 
 import java.math.BigDecimal;
@@ -33,7 +32,7 @@ public record RequestResponseDTO(
                 request.getId(),
                 request.getCustomer() != null ? request.getCustomer().getId() : null,
                 request.getCustomer() != null ? request.getCustomer().getName() : null,
-                request.getClass().getSimpleName(),
+                request.getType().getDescription(),
                 accountTypeStr,
                 limit,
                 request.getStatus().name(),
