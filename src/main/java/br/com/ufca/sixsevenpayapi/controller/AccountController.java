@@ -70,7 +70,7 @@ public class AccountController {
     })
     @PostMapping("/{sourceAccountId}/transfer")
     public ResponseEntity<TransactionResponseDTO> transfer(@PathVariable Long sourceAccountId, @Valid @RequestBody TransferDTO dto){
-        TransactionResponseDTO response =  accountService.transferBetweenOwnAccount(sourceAccountId, dto);
+        TransactionResponseDTO response =  accountService.transfer(sourceAccountId, dto);
         return ResponseEntity.ok(response);
     }
 
