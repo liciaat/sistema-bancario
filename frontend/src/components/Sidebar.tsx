@@ -1,11 +1,13 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import {BrandLogo} from './BrandLogo';
+import { BrandLogo } from './BrandLogo';
+import { logout } from '../services/auth.service';
 
 export default function Sidebar() {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        navigate('/');
+        logout();
+        navigate('/login', { replace: true });
     };
 
     const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -48,7 +50,7 @@ export default function Sidebar() {
                 className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 w-full mt-auto"
             >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                Sair da contas
+                Sair da conta
             </button>
         </aside>
     );
