@@ -120,6 +120,7 @@ public class AuthenticationService {
             }
 
             ClosureRequest request = new ClosureRequest(customer);
+            request.validateClosingEligibility();
             requestRepository.save(request);
         }else if(user instanceof Manager){
             user.deactivate();

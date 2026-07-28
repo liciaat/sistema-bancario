@@ -13,7 +13,6 @@ import br.com.ufca.sixsevenpayapi.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -134,21 +133,13 @@ public class RequestService {
                 CreditCard newCreditCard = new CreditCard(creditReq.getRequestedLimit(), cardNumber, creditReq.getCustomer(), generateCvv());
                 creditCardRepository.save(newCreditCard);
             }
-        } else if (request instanceof ClosureRequest) {
-            Customer customer = request.getCustomer();
+        } else if (request instanceof ClosureRequest closureRequest) {
+            closureRequest.validateClosingEligibility();
+            Customer customer = closureRequest.getCustomer();
 
-            if (customer.getAccounts() != null && !customer.getAccounts().isEmpty()) {
-                if(customer.getCreditCard() != null && customer.getCreditCard().getCurrentSpending().compareTo(BigDecimal.ZERO) > 0){
-                    throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Não é possível excluir o perfil: ainda existe divida no cartão de crédito");
-                }
-
-                for (Account account : customer.getAccounts()) {
-                    if (account.getBalance() != null && account.getBalance().compareTo(BigDecimal.ZERO) != 0) {
-                        throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Não é possível excluir o perfil: ainda existe saldo na conta " + account.getAccountNumber());
-                    }
-                    account.setAccountStatus(AccountStatus.CLOSED);
-                    accountRepository.save(account);
-                }
+            for (Account account : customer.getAccounts()) {
+                account.setAccountStatus(AccountStatus.CLOSED);
+                accountRepository.save(account);
             }
             customer.deactivate();
             userRepository.save(customer);
