@@ -1,6 +1,6 @@
 package br.com.ufca.sixsevenpayapi.domain.entity;
 
-
+import br.com.ufca.sixsevenpayapi.common.exception.BadRequestException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
@@ -24,6 +24,13 @@ public class Administrator extends Employee {
             LocalDate hireDate) {
 
         super(fullName, cpf, email, password, phone, registration, hireDate);
+    }
+
+    public void deactivateManager(Manager manager) {
+        if (!manager.isActive()) {
+            throw new BadRequestException("Gerente já está inativo");
+        }
+        manager.deactivate();
     }
 
 }

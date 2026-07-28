@@ -1,6 +1,7 @@
 package br.com.ufca.sixsevenpayapi.application.service;
 
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
+import br.com.ufca.sixsevenpayapi.domain.entity.SavingsAccount;
 import br.com.ufca.sixsevenpayapi.domain.entity.SystemConfig;
 import br.com.ufca.sixsevenpayapi.domain.entity.Transaction;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -50,12 +50,13 @@ public class SavingsSchedulerService {
 
         List<Account> savingsAccounts = accountRepository.findByAccountTypeAndAccountStatus(AccountType.SAVINGS, AccountStatus.ACTIVE);
         for(Account account : savingsAccounts){
+            SavingsAccount savingsAccount = (SavingsAccount) account;
             BigDecimal currentBalance = account.getBalance();
 
             if(currentBalance.compareTo(BigDecimal.ZERO) > 0){
-                BigDecimal yieldAmount = currentBalance.multiply(rateMultiplier).setScale(2, RoundingMode.HALF_UP);
-                account.setBalance(account.getBalance().add(yieldAmount));
-                accountRepository.save(account);
+                BigDecimal yieldAmount = savingsAccount.calculateMonthlyYield(rateMultiplier);
+                savingsAccount.applyMonthlyYield(rateMultiplier);
+                accountRepository.save(savingsAccount);
 
                 Transaction transaction = new Transaction(account, yieldAmount, TransactionType.YIELD);
                 transactionRepository.save(transaction);

@@ -35,11 +35,10 @@ export function CustomerPurchase() {
     if (!value || value <= 0) return setError('Informe um valor válido.')
 
     try {
-      // Limpeza do número do cartão: remove todos os espaços
       const cleanCardNumber = cardNumber.replace(/\s+/g, '')
 
       await processCreditPurchase({
-        cardNumber: cleanCardNumber, // <- Enviando o número limpo
+        cardNumber: cleanCardNumber,
         cvv,
         transactionPassword: password,
         amount: value,

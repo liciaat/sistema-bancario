@@ -153,13 +153,13 @@ public class RequestService {
             customer.deactivate();
             userRepository.save(customer);
 
-            request.setStatus(RequestStatus.APPROVED);
+            manager.approveRequest(request);
             Request updatedRequest = requestRepository.save(request);
             return RequestResponseDTO.fromEntity(updatedRequest);
         }
 
 
-        request.setStatus(RequestStatus.APPROVED);
+        manager.approveRequest(request);
         Request updatedRequest = requestRepository.save(request);
 
         return RequestResponseDTO.fromEntity(updatedRequest);
@@ -188,7 +188,7 @@ public class RequestService {
         throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Apenas solicitações com status PENDENTE podem ser negadas");
         }
 
-        request.setStatus(RequestStatus.REJECTED);
+        manager.rejectRequest(request);
         Request updatedRequest = requestRepository.save(request);
 
         return RequestResponseDTO.fromEntity(updatedRequest);

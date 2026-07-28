@@ -57,7 +57,6 @@ export function CustomerAccount() {
     }
   }, [selectedAccount?.id])
 
-  // Melhoria de UX: Limpa os formulários ao trocar de aba
   function handleOperationChange(newOperation: Operation) {
     setOperation(newOperation)
     setError(null)
@@ -203,7 +202,7 @@ export function CustomerAccount() {
                                   if (own) {
                                     setTargetAccountNumber(accounts.find((account) => account.id !== selectedAccount?.id)?.accountNumber ?? '')
                                   } else {
-                                    setTargetAccountNumber('') // Limpa ao desmarcar a caixa
+                                    setTargetAccountNumber('')
                                   }
                                 }}
                                 className="h-4 w-4 accent-[#ffde00]"

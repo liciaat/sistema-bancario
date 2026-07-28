@@ -9,7 +9,7 @@ public record UserResponseDTO(Long id, String name, String email, String cpf, St
                 user.getName(),
                 user.getEmail(),
                 user.getCpf(),
-                user.getClass().getSimpleName().toUpperCase() // Ex: CUSTOMER, MANAGER, ADMINISTRATOR
+                user.getClass().getSimpleName().toUpperCase()
         );
     }
 }

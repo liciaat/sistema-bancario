@@ -65,6 +65,30 @@ public abstract class Account extends BaseEntity {
         this.balance = balance;
     }
 
+    public void deposit(BigDecimal amount) {
+        this.balance = this.balance.add(amount);
+    }
+
+    public boolean canDebit(BigDecimal amount) {
+        return balance.compareTo(amount) >= 0;
+    }
+
+    public void debit(BigDecimal amount) {
+        if (!canDebit(amount)) {
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException(
+                    "Saldo insuficiente. O valor ultrapassa o limite da conta.");
+        }
+        this.balance = this.balance.subtract(amount);
+    }
+
+    public void withdraw(BigDecimal amount) {
+        if (balance.compareTo(amount) < 0) {
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException(
+                    "Saldo insuficiente para saque");
+        }
+        this.balance = this.balance.subtract(amount);
+    }
+
     public Customer getCustomer() {
         return customer;
     }

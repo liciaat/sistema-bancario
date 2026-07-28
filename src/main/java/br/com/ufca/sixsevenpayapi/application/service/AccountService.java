@@ -4,7 +4,6 @@ import br.com.ufca.sixsevenpayapi.application.dto.*;
 import br.com.ufca.sixsevenpayapi.domain.entity.Account;
 import br.com.ufca.sixsevenpayapi.domain.entity.Transaction;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
-import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 import br.com.ufca.sixsevenpayapi.domain.enums.TransactionType;
 import br.com.ufca.sixsevenpayapi.repository.AccountRepository;
 import br.com.ufca.sixsevenpayapi.repository.TransactionRepository;
@@ -13,7 +12,7 @@ import br.com.ufca.sixsevenpayapi.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,8 +22,6 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
-
-    private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("500");
 
     public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
@@ -44,7 +41,7 @@ public class AccountService {
             throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Operação não permitida: A conta está bloqueada ou inativa.");
         }
 
-        account.setBalance(account.getBalance().add(dto.amount()));
+        account.deposit(dto.amount());
         accountRepository.save(account);
 
         Transaction transaction = new Transaction(account, dto.amount(), TransactionType.DEPOSIT);
@@ -101,12 +98,7 @@ public class AccountService {
             throw new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("Senha de transação incorreta!");
         }
 
-        if(account.getBalance().compareTo(dto.amount()) < 0){
-            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Saldo insuficiente para saque");
-        }
-
-
-        account.setBalance(account.getBalance().subtract(dto.amount()));
+        account.withdraw(dto.amount());
         accountRepository.save(account);
         Transaction transaction = new Transaction(account, dto.amount().negate(), TransactionType.WITHDRAW);
         transactionRepository.save(transaction);
@@ -137,8 +129,10 @@ public class AccountService {
             throw new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("Senha de transação incorreta!");
         }
 
-        checkAvailableLimit(sourceAccount, dto.amount());
-
+        if (!sourceAccount.canDebit(dto.amount())) {
+            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException(
+                    "Saldo insuficiente. O valor ultrapassa o limite da conta.");
+        }
 
         Account targetAccount = accountRepository.findByAccountNumber(dto.targetAccountNumber())
                 .orElseThrow(() -> new br.com.ufca.sixsevenpayapi.common.exception.NotFoundException("Conta Destino não encontrada"));
@@ -151,9 +145,9 @@ public class AccountService {
             throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Operação não permitida: A conta destino está bloqueada ou inativa.");
         }
 
-        sourceAccount.setBalance(sourceAccount.getBalance().subtract(dto.amount()));
+        sourceAccount.debit(dto.amount());
         accountRepository.save(sourceAccount);
-        targetAccount.setBalance(targetAccount.getBalance().add(dto.amount()));
+        targetAccount.deposit(dto.amount());
         accountRepository.save(targetAccount);
 
         Transaction sourceTransaction = new Transaction(sourceAccount, dto.amount().negate(), TransactionType.TRANSFER);
@@ -196,17 +190,6 @@ public class AccountService {
                 account.getAccountNumber(),
                 account.getBalance()
         );
-    }
-
-    private void checkAvailableLimit(Account account, BigDecimal requestedAmount){
-        BigDecimal availableLimit = account.getBalance();
-
-        if(account.getAccountType() == AccountType.CHECKING){
-            availableLimit = availableLimit.add(OVERDRAFT_LIMIT);
-        }
-        if(availableLimit.compareTo(requestedAmount) < 0){
-            throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Saldo insuficiente. O valor ultrapassa o limite da conta.");
-        }
     }
 
 }

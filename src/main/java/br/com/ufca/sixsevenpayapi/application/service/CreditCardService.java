@@ -3,7 +3,6 @@ package br.com.ufca.sixsevenpayapi.application.service;
 import br.com.ufca.sixsevenpayapi.application.dto.*;
 import br.com.ufca.sixsevenpayapi.domain.entity.*;
 import br.com.ufca.sixsevenpayapi.domain.enums.AccountStatus;
-import br.com.ufca.sixsevenpayapi.domain.enums.AccountType;
 import br.com.ufca.sixsevenpayapi.domain.enums.InvoiceStatus;
 import br.com.ufca.sixsevenpayapi.domain.enums.TransactionType;
 import br.com.ufca.sixsevenpayapi.repository.*;
@@ -111,16 +110,11 @@ public class CreditCardService {
             throw new br.com.ufca.sixsevenpayapi.common.exception.UnauthorizedException("Senha de transação incorreta");
         }
 
-        BigDecimal availableLimit = account.getBalance();
-        if (account.getAccountType() == AccountType.CHECKING) {
-            availableLimit = availableLimit.add(new BigDecimal("500.00")); // Limite do cheque especial
-        }
-
-        if(availableLimit.compareTo(invoice.getTotalAmount()) < 0){
+        if (!account.canDebit(invoice.getTotalAmount())) {
             throw new br.com.ufca.sixsevenpayapi.common.exception.BadRequestException("Saldo insuficiente para pagar a fatura");
         }
 
-        account.setBalance(account.getBalance().subtract(invoice.getTotalAmount()));
+        account.debit(invoice.getTotalAmount());
         accountRepository.save(account);
 
         Transaction transaction = new Transaction(account, invoice.getTotalAmount().negate(), TransactionType.INVOICE);
