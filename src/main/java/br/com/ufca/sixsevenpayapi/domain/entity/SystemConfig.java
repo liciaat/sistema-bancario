@@ -12,7 +12,7 @@ import java.time.YearMonth;
 @Table(name = "system_configs")
 public class SystemConfig extends BaseEntity {
 
-    @Column(name = "savings_interest_rate", nullable = false,precision = 5, scale = 2)
+    @Column(name = "savings_interest_rate", nullable = false, precision = 7, scale = 4)
     private BigDecimal savingsInterestRate;
 
     @Column(name = "last_yield_processed_month")
