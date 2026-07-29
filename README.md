@@ -160,6 +160,15 @@ http://localhost:5173
 
 Abra esse endereço no navegador para utilizar o sistema.
 
+## Primeiro acesso
+
+Ao iniciar a API pela primeira vez, o sistema cria automaticamente a conta de administrador:
+
+| Campo | Valor |
+| --- | --- |
+| CPF | `00000000000` |
+| Senha | `admin` |
+
 ## Banco de dados
 
 O sistema usa o banco H2. Os dados ficam persistidos localmente na pasta:
@@ -167,6 +176,21 @@ O sistema usa o banco H2. Os dados ficam persistidos localmente na pasta:
 ```text
 database/paydb.mv.db
 ```
+
+### Reiniciar os dados locais
+
+Para começar com uma base vazia durante o desenvolvimento, pare a API e exclua os arquivos `database/paydb.mv.db` e `database/paydb.trace.db`. Ao iniciar a aplicação novamente, o banco e a conta de administrador serão recriados.
+
+> Atenção: esse procedimento apaga permanentemente todos os cadastros, contas e movimentações locais.
+
+## Problemas comuns
+
+| Situação | Como resolver |
+| --- | --- |
+| O frontend mostra erro ao carregar dados | Confirme que a API está em execução em `http://localhost:8080` antes de iniciar ou usar o frontend. |
+| `npm run dev` falha por dependências ausentes | Execute `npm install` dentro da pasta `frontend` e tente novamente. |
+| A porta 8080 já está em uso | Encerre a aplicação que está usando a porta ou configure outra porta para a API e atualize o proxy do Vite. |
+| A porta 5173 já está em uso | Encerre o outro servidor Vite ou aceite a porta alternativa indicada no terminal. |
 
 ## Perfis do sistema
 
@@ -192,7 +216,6 @@ database/paydb.mv.db
 - Bloqueio e ativação de contas.
 - Consulta de transações gerais com titular da conta.
 - Consulta de contas negativadas.
-- Atualização dos próprios dados.
 
 ### Administrador
 
@@ -203,6 +226,8 @@ database/paydb.mv.db
 - Listas separadas de gerentes ativos e desativados.
 - Reativação automática de gerente desativado quando o mesmo CPF é cadastrado novamente.
 - Atualização da taxa de rendimento das contas poupança.
+
+Ao informar a taxa mensal, use porcentagem: por exemplo, `0,5` representa **0,5% ao mês**.
 
 ## API — principais grupos de rotas
 
