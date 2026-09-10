@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="LOGO/WhatsApp%20Image%202026-07-27%20at%2016.13.58.png" alt="67 PAY" width="200">
+<img src="docs/images/logo.png" alt="67 PAY" width="200">
 
 # 67 PAY
 
@@ -298,45 +298,27 @@ Os serviços do frontend são responsáveis pela comunicação com a API, enquan
 
 ---
 
-<!--
-Quando as capturas de tela forem adicionadas ao repositório,
-crie a pasta docs/images e remova este comentário.
+## 🖥️ Interface
 
-## Interface
-
-### Dashboard do cliente
+### Experiência do cliente
 
 <p align="center">
-    <img src="docs/images/dashboard-cliente.png" width="850" alt="Dashboard do cliente">
+  <img src="docs/images/dashboard-cliente.png" width="850" alt="Dashboard do cliente">
 </p>
 
-### Contas e transações
-
 <p align="center">
-    <img src="docs/images/transacoes.png" width="850" alt="Tela de contas e transações">
+  <img src="docs/images/transacoes.png" width="410" alt="Contas e transações">
+  <img src="docs/images/cartao.png" width="410" alt="Cartão de crédito">
 </p>
 
-### Cartão de crédito
+### Gerenciamento
 
 <p align="center">
-    <img src="docs/images/cartao.png" width="850" alt="Tela de cartão de crédito">
-</p>
-
-### Painel do gerente
-
-<p align="center">
-    <img src="docs/images/painel-gerente.png" width="850" alt="Painel do gerente">
-</p>
-
-### Painel administrativo
-
-<p align="center">
-    <img src="docs/images/painel-administrador.png" width="850" alt="Painel administrativo">
+  <img src="docs/images/painel-gerente.png" width="410" alt="Painel do gerente">
+  <img src="docs/images/painel-administrador.png" width="410" alt="Painel administrativo">
 </p>
 
 ---
--->
-
 ## API REST
 
 A comunicação entre o frontend e o backend é realizada através de uma API REST.
